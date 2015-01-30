@@ -6,20 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ARTEMIS Link Hunter</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.5.0/bootstrap-table.min.css">
     <link rel='stylesheet' href='public/css/app.min.css' />
 
     <script>
-        var mozApi = {
-            "accessId": "member-c585999055",
-            "secretKey": "79fb24f5736619a2029d7da68fbd88ec",
-            // Regen the below with each request
-            "expires": "1422625775",
-            "signature": "s0624tGTJzfnvRUi09quKC2q0ko=",
-            "append": "&AccessID=member-c585999055&Expires=1422625775&Signature=s0624tGTJzfnvRUi09quKC2q0ko%3D"
-        };
-
         var sharedCount = {
             "key": "a96a4b17c9e761a475cc28a1731c8dc96ff7c6aa",
             "url": "//free.sharedcount.com"
@@ -88,58 +80,70 @@
 
 
         var ContentPiece = function() {
+            this.name = "";
+            this.url = "";
+            this.billableHours = 0;
+            this.links = [];
+            this.shares = {};
+
             for(var prop in arguments[0])   {
                 this[prop] = arguments[0][prop];
             }
         }
-        ContentPiece.prototype.getLinks = function () {
-            var apiURL = "http://lsapi.seomoz.com/linkscape"
-                +"/links/"
-                +this.url
-                +"?"
-                +"&Scope=page_to_page"
-                +"&Sort=domain_authority"
-                +"&Filter=equity" // links with equity
-                +"&LinkCols=2" // Flags full of data on each link
-                +"&TargetCols=256" // No. of links
-                +"&SourceCols=68719476736" // DA
-                +"&Limit=50"
-                +"&"+mozApi.append;
-                console.log(apiURL)
-            // $.ajax(apiURL)
-            // .success(function(data) {
-            //     console.log(data);
-            // });
+        ContentPiece.prototype = {
+            getLinks: function (callback) {
+                var instance = this;
+                var linksForURLapi = "/links/"
+                    +this.url
+                    +"?"
+                    +"&Scope=page_to_page"
+                    +"&Sort=domain_authority"
+                    +"&Filter=equity" // links with equity
+                    +"&LinkCols=4" // Flags full of data on each link
+                    +"&TargetCols=256" // No. of links
+                    +"&SourceCols="+(4+68719476736) // URL + DA of source
+                    +"&Limit=50";
 
-            $.ajax({
-                url: apiURL,
-                dataType: 'jsonp',
-                jsonp: 'jsonp',
-                type: "post",
-                success: function(res) {
-                    console.log(res)
-                }
-            });
-        }
-        ContentPiece.prototype.getSocial = function() {
-            $.sharedCount(this.url, function(data){
-                console.log(data);
-            });
-        }
-        ContentPiece.prototype.linkValue = function (nLinks, DA, relevant) {
-            return relevant ?
-            ( nLinks * 150 ) * (DA / 100 + 1 ) + 10 :
-            ( nLinks * 150 ) * (DA / 100 + 1 ) - 50
-        }
-        ContentPiece.prototype.contentValue = function (linksValue, twitterShares, facebookShares, googleShares, otherShares) {
-            return linksValue
-            + (twitterShares * 0.25)
-            + (facebookShares * 0.25)
-            + (googleShares * 0.4)
-            + (otherShares * 0.15)
-        }
-        ContentPiece.prototype.ROI = function (billableHours, contentValue) {
-            contentValue - (billableHours * 75)
+                $.ajax({
+                    url: "mozapi.php",
+                    type: "POST",
+                    data: {url:linksForURLapi},
+                    error: function (msg) {console.warn(msg);},
+                    success: function(res){
+                        console.log(res);
+                        var links = JSON.parse(res);
+                        _.each(links, function(link) {
+                            var linkObject = {url: link.uu, domainAuthority: link.pda, known: false};
+                            instance.links.push(linkObject)
+                        })
+                        callback(instance.links);
+                    }
+                });
+            },
+
+            getSocial: function() {
+                $.sharedCount(this.url, function(data){
+                    console.log(data);
+                });
+            },
+
+            linkValue: function (nLinks, DA, relevant) {
+                return relevant ?
+                ( nLinks * 150 ) * (DA / 100 + 1 ) + 10 :
+                ( nLinks * 150 ) * (DA / 100 + 1 ) - 50
+            },
+
+            contentValue: function (linksValue, twitterShares, facebookShares, googleShares, otherShares) {
+                return linksValue
+                + (twitterShares * 0.25)
+                + (facebookShares * 0.25)
+                + (googleShares * 0.4)
+                + (otherShares * 0.15)
+            },
+
+            ROI: function (billableHours, contentValue) {
+                contentValue - (billableHours * 75)
+            }
         }
 
         //
@@ -151,7 +155,9 @@
                     url: $("#input-content-url").val(),
                     billableHours: $("#input-content-hours").val()
                 });
-                contentPiece.getLinks();
+                contentPiece.getLinks(function(arr){
+                    console.log(arr);
+                });
             })
         })
     </script>
