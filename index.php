@@ -42,42 +42,26 @@
             return jQuery.ajax(arg);
         };
 
-        /*
+        var ContentLink = function() {
+            this.url = "";
+            this.domainAuthority = 0;
+            this.known = false;
+            this.relevant = true;
+            this.baseValue = 150;
 
-        // Add to end of each API call
-            &AccessID=member-c585999055&Expires=1422625775&Signature=s0624tGTJzfnvRUi09quKC2q0ko%3D
+            for(var prop in arguments[0])   {
+                this[prop] = arguments[0][prop];
+            }
+        }
+        ContentLink.prototype = {
+            value: function () {
+                var link = this;
 
-        // URL METRICS
-            http://lsapi.seomoz.com/linkscape/url-metrics/moz.com%2fblog?Cols=2048
-
-            http://lsapi.seomoz.com/linkscape
-                /url-metrics
-                /moz.com
-                ?Cols=2048
-                &AccessID=member-c585999055
-                &Expires=1422625775
-                &Signature=s0624tGTJzfnvRUi09quKC2q0ko%3D
-
-        // LINK METRICS
-            http://moz.com/help/guides/moz-api/mozscape/api-reference/link-metrics
-
-            http://lsapi.seomoz.com/linkscape/links/moz.com%2fblog?SourceCols=4&TargetCols=4&Scope=page_to_page&Sort=page_authority&SourceDomain=microsoft.com&Limit=1
-
-            http://lsapi.seomoz.com/linkscape
-                /links
-                /moz.com
-                ?
-                &Scope=page_to_page
-                &Sort=domain_authority
-                &Filter=equity // links with equity
-                &LinkCols=2 // Flags full of data on each link
-                &TargetCols=256 // No. of links
-                &SourceCols=68719476736 // DA
-                &Limit=50
-        */
-
-        //
-
+                return link.relevant ?
+                    link.baseValue * ( link.domainAuthority / 100 + 1 ) + 10 :
+                    link.baseValue * ( link.domainAuthority / 100 + 1 ) - 50
+            },
+        }
 
         var ContentPiece = function() {
             this.name = "";
@@ -85,6 +69,7 @@
             this.billableHours = 0;
             this.links = [];
             this.shares = {};
+            this.costPerHour = 75;//£
 
             for(var prop in arguments[0])   {
                 this[prop] = arguments[0][prop];
@@ -92,9 +77,9 @@
         }
         ContentPiece.prototype = {
             getLinks: function (callback) {
-                var instance = this;
+                var content = this;
                 var linksForURLapi = "/links/"
-                    +this.url
+                    +encodeURIComponent(content.url)
                     +"?"
                     +"&Scope=page_to_page"
                     +"&Sort=domain_authority"
@@ -110,39 +95,61 @@
                     data: {url:linksForURLapi},
                     error: function (msg) {console.warn(msg);},
                     success: function(res){
-                        console.log(res);
                         var links = JSON.parse(res);
                         _.each(links, function(link) {
-                            var linkObject = {url: link.uu, domainAuthority: link.pda, known: false};
-                            instance.links.push(linkObject)
+                            var linkObject = new ContentLink({url: link.uu, domainAuthority: link.pda, known: false, relevant: true });
+                            content.links.push(linkObject)
                         })
-                        callback(instance.links);
+                        if(callback) callback(content.links);
                     }
                 });
             },
 
-            getSocial: function() {
+            getSocial: function(callback) {
+                var content = this;
                 $.sharedCount(this.url, function(data){
                     console.log(data);
+                    content.shares = {
+                        twitter: data.Twitter,
+                        facebook: data.Facebook.like_count + data.Facebook.share_count,
+                        google: data.GooglePlusOne,
+                        other: data.Buzz + data.Delicious + data.LinkedIn + data.Pinterest + data.Reddit + data.StumbleUpon
+                    };
+                    if(callback) callback(content.shares);
                 });
             },
 
-            linkValue: function (nLinks, DA, relevant) {
-                return relevant ?
-                ( nLinks * 150 ) * (DA / 100 + 1 ) + 10 :
-                ( nLinks * 150 ) * (DA / 100 + 1 ) - 50
+            linkValue: function() {
+                var content = this
+                  , totalLinkValue = 0;
+
+                _.each(content.links, function(link) {
+                    totalLinkValue += link.value();
+                });
+                return totalLinkValue;
             },
 
-            contentValue: function (linksValue, twitterShares, facebookShares, googleShares, otherShares) {
-                return linksValue
-                + (twitterShares * 0.25)
-                + (facebookShares * 0.25)
-                + (googleShares * 0.4)
-                + (otherShares * 0.15)
+            socialValue: function() {
+                var content = this;
+                return (content.shares.twitter * 0.25)
+                     + (content.shares.facebook * 0.25)
+                     + (content.shares.google * 0.4)
+                     + (content.shares.other * 0.15)
             },
 
-            ROI: function (billableHours, contentValue) {
-                contentValue - (billableHours * 75)
+            value: function (callback) {
+                var content = this;
+                return content.linkValue() + content.socialValue();
+            },
+
+            earnings: function (billableHours, contentValue) {
+                var content = this; //£
+                return content.value() - (content.billableHours * content.costPerHour)
+            },
+
+            cost: function() {
+                var content = this; //£
+                return content.billableHours * content.costPerHour;
             }
         }
 
@@ -155,8 +162,12 @@
                     url: $("#input-content-url").val(),
                     billableHours: $("#input-content-hours").val()
                 });
-                contentPiece.getLinks(function(arr){
-                    console.log(arr);
+                contentPiece.getLinks(function(links){
+                    contentPiece.getSocial(function(shares){
+                        console.log( contentPiece );
+                        console.log( contentPiece.value() );
+                        console.log( contentPiece.earnings() );
+                    });
                 });
             })
         })
