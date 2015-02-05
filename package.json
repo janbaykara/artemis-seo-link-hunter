@@ -1,0 +1,35 @@
+{
+  "name": "artemis",
+  "version": "1.0.0",
+  "description": "Content link hunter",
+  "main": "gulp",
+  "repository": {
+    "type": "git",
+    "url": "https://janbaykara@bitbucket.org/boomonline/artemis.git"
+  },
+  "keywords": [
+    "Link",
+    "SEO",
+    "marketing",
+    "API",
+    "app"
+  ],
+  "author": "Jan Baykara <jan@baykara.co.uk> (http://jan.baykara.co.uk/)",
+  "license": "MIT",
+  "devDependencies": {
+    "bower": "*",
+    "del": "*",
+    "gulp": "*",
+    "gulp-autoprefixer": "*",
+    "gulp-concat": "*",
+    "gulp-sass": "1.1.0",
+    "gulp-load-plugins": "*",
+    "gulp-minify-css": "*",
+    "gulp-rename": "*",
+    "gulp-size": "*",
+    "gulp-uglify": "*",
+    "gulp-watch": "*",
+    "gulp-sourcemaps": "*",
+    "main-bower-files": "*"
+  }
+}

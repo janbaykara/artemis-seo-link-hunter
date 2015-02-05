@@ -1,0 +1,9 @@
+{
+  "name": "boom-googprods",
+  "dependencies": {
+    "underscore": "*",
+    "jquery": "*",
+    "angularjs": "*"
+  },
+  "overrides": {}
+}
