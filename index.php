@@ -8,10 +8,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.5.0/bootstrap-table.min.css">
     <link rel='stylesheet' href='public/css/app.min.css' />
-
     <script>
+        _.templateSettings = {
+          interpolate: /\{\{(.+?)\}\}/g
+        };
+
         var sharedCount = {
             "key": "a96a4b17c9e761a475cc28a1731c8dc96ff7c6aa",
             "url": "//free.sharedcount.com"
@@ -108,7 +110,6 @@
             getSocial: function(callback) {
                 var content = this;
                 $.sharedCount(this.url, function(data){
-                    console.log(data);
                     content.shares = {
                         twitter: data.Twitter,
                         facebook: data.Facebook.like_count + data.Facebook.share_count,
@@ -137,6 +138,11 @@
                      + (content.shares.other * 0.15)
             },
 
+            cost: function() {
+                var content = this; //£
+                return content.billableHours * content.costPerHour;
+            },
+
             value: function (callback) {
                 var content = this;
                 return content.linkValue() + content.socialValue();
@@ -144,49 +150,54 @@
 
             earnings: function (billableHours, contentValue) {
                 var content = this; //£
-                return content.value() - (content.billableHours * content.costPerHour)
-            },
-
-            cost: function() {
-                var content = this; //£
-                return content.billableHours * content.costPerHour;
+                return content.value() - content.cost()
             }
         }
 
         //
-
         $(document).ready(function() {
+            var _results = _.template($("#results").html());
+
             $("#btn-hunt-links").on('click', function() {
-                var contentPiece = new ContentPiece({
-                    name: $("#input-content-name").val(),
-                    url: $("#input-content-url").val(),
-                    billableHours: $("#input-content-hours").val()
-                });
-                contentPiece.getLinks(function(links){
-                    contentPiece.getSocial(function(shares){
-                        console.log( contentPiece );
-                        console.log( contentPiece.value() );
-                        console.log( contentPiece.earnings() );
-                    });
-                });
+                // var contentPiece = new ContentPiece({
+                //     name: $("#input-content-name").val(),
+                //     url: $("#input-content-url").val(),
+                //     billableHours: $("#input-content-hours").val()
+                // });
+                // contentPiece.getLinks(function(links){
+                //     contentPiece.getSocial(function(shares){
+                    var contentPiece = {"name":"9001 Reasons Why I'm Voting UKIP","url":"http://www.appliancecity.co.uk/chilli/","billableHours":"15","links":[{"url":"visual.ly/periodic-table-worlds-hottest-chillis","domainAuthority":86.75191225648942,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/beer","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/creativity-101","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/the-auberge-handfield","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/Stibo","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/edwinbinary","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/tetra-pak-uht-milk","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/pausa","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/house-price-trendometer","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/miportfolio-responsive-one-page-creative-theme","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/jesserichards-com","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/saijo-s-curated-marketing-tools","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/beer?subsection=open","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/xhtmlchop","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/creativity-101?subsection=all","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/tetra-pak-uht-milk?subsection=open","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/hidden-wounds?subsection=open","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/sweet-delicious-vegetables-with-le-creuset?subsection=open","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/zywiec-the-verse?subsection=open","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.awwwards.com/best-websites/13-9-dia-do-baralho?subsection=open","domainAuthority":82.10075883518978,"known":false,"relevant":true,"baseValue":150},{"url":"www.thespicehouse.com/spices-by-category/chiles","domainAuthority":55.30671509220559,"known":false,"relevant":true,"baseValue":150},{"url":"infographicjournal.com/hottest-chillis-in-the-world/","domainAuthority":42.655840624517225,"known":false,"relevant":true,"baseValue":150},{"url":"wtfviz.net/post/89272698800/chilly-chillis","domainAuthority":41.34480508918695,"known":false,"relevant":true,"baseValue":150},{"url":"www.cocinillas.es/2014/12/como-se-mide-el-picante-escala-scoville/","domainAuthority":38.26196225992646,"known":false,"relevant":true,"baseValue":150},{"url":"www.scottrobertsweb.com/interactive-periodic-table-of-the-worlds-hottest-chile-peppers/","domainAuthority":37.18224658920168,"known":false,"relevant":true,"baseValue":150},{"url":"www.scottrobertsweb.com/page/4/","domainAuthority":37.18224658920168,"known":false,"relevant":true,"baseValue":150},{"url":"www.scottrobertsweb.com/page/3/","domainAuthority":37.18224658920168,"known":false,"relevant":true,"baseValue":150},{"url":"www.scottrobertsweb.com/page/2/","domainAuthority":37.18224658920168,"known":false,"relevant":true,"baseValue":150},{"url":"www.scottrobertsweb.com/page/6/","domainAuthority":37.18224658920168,"known":false,"relevant":true,"baseValue":150},{"url":"srednja.hr/Novosti/Jeste-li-znali/Ljuta-hrana-odlicno-djeluje-na-vase-tijelo-i-liniju-doznajte-kako","domainAuthority":32.21940185857237,"known":false,"relevant":true,"baseValue":150},{"url":"www.srednja.hr/Novosti/Jeste-li-znali/Ljuta-hrana-odlicno-djeluje-na-vase-tijelo-i-liniju-doznajte-kako","domainAuthority":32.21940185857237,"known":false,"relevant":true,"baseValue":150},{"url":"www.alyssaandcarla.com/2014/05/30/weekly-love-letter-may-30th-2014/","domainAuthority":31.837376148018624,"known":false,"relevant":true,"baseValue":150},{"url":"www.alyssaandcarla.com/category/carla/page/2/","domainAuthority":31.837376148018624,"known":false,"relevant":true,"baseValue":150},{"url":"www.appliancecity.co.uk/chilli/","domainAuthority":30.973347828841515,"known":false,"relevant":true,"baseValue":150},{"url":"www.appliancecity.co.uk/chilli","domainAuthority":30.973347828841515,"known":false,"relevant":true,"baseValue":150},{"url":"visitresponsivewebsites.com/tag/graphic-design","domainAuthority":19.59692071890584,"known":false,"relevant":true,"baseValue":150},{"url":"visitresponsivewebsites.com/tag/single-page","domainAuthority":19.59692071890584,"known":false,"relevant":true,"baseValue":150},{"url":"vcb.bz/kpx","domainAuthority":15.314589405272383,"known":false,"relevant":true,"baseValue":150}],"shares":{"twitter":70,"facebook":58,"google":6,"other":6},"costPerHour":75};
+                        console.log(contentPiece);
+                        $("#results").html(_results(contentPiece))
+                //     });
+                // });
             })
-        })
+        });
+
     </script>
+
+    <style>
+        body{
+           min-width:1000px; /* suppose you want minimun width of 1000px */
+           width: auto !important;  /* Firefox will set width as auto */
+           width:1000px;             /* As IE ignores !important it will set width as 1000px; */
+        }
+    </style>
+    <link rel='stylesheet' href='../global/public/css/app.min.css' />
 </head>
 <body>
-
     <?php include '../global/header.php'; ?>
 
     <div class='container'>
         <div class='row'>
             <div class='col-md-12'>
                 <h1>ARTEMIS Link Hunter
-                    <small>Do the thing</small>
+                    <small>a.k.a. Waynebot 1000</small>
                 </h1>
+                <p class='wiki-def'>In the classical period of Greek mythology, <strong>Artemis</strong> (Ancient Greek: Ἄρτεμις) was goddess of the hunt, wild animals, wilderness, childbirth, virginity and protector of young girls, bringing and relieving disease in women; she often was depicted as a huntress carrying a bow and arrows. The deer and the cypress were sacred to her.</p>
             </div>
         </div>
 
-        <hr>
         <div class='row' id='phase-1'>
             <div class='col-md-12'>
                 <h2>Your content piece</h2>
@@ -196,7 +207,7 @@
         <div class='row'>
             <div class="form-group col-md-9">
                 <label for="input-content-title">Title</label>
-                <input type="text" class="form-control" id="input-content-title" placeholder="Content name" />
+                <input type="text" class="form-control" id="input-content-name" placeholder="Content name" value="9001 Reasons Why I'm Voting UKIP" />
             </div>
             <div class="form-group col-md-3">
                 <label for="input-content-hours">Billable hours</label>
@@ -228,21 +239,11 @@
         <hr>
         <div class='row' id='phase-2'>
             <div class='col-md-12'>
-                <h2>Looking for other links to this</h2>
+                <h2>Analysis</h2>
             </div>
-        </div>
-
-        <hr>
-        <div class='row' id='phase-3'>
-            <div class='col-md-12'>
-                <h2>Looking for other links to this</h2>
-            </div>
-        </div>
-
-        <hr>
-        <div class='row' id='phase-4'>
-            <div class='col-md-12'>
-                <h2>Analysing links + social shares</h2>
+            <div class='col-md-12' id='results'>
+                <h3>Name: {{name}}</h3>
+                {{links}}
             </div>
         </div>
 
@@ -256,7 +257,6 @@
 
     <script src="public/js/libs.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.5.0/bootstrap-table.min.js"></script>
     <script src="public/js/app.min.js"></script>
 </body>
 </html>
