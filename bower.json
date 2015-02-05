@@ -3,7 +3,8 @@
   "dependencies": {
     "underscore": "*",
     "jquery": "*",
-    "angularjs": "*"
+    "angularjs": "*",
+    "angular-ui-router": "*"
   },
   "overrides": {}
 }
