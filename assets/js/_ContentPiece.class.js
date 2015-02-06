@@ -5,6 +5,12 @@ var ContentPiece = function() {
     this.links = [];
     this.shares = {};
     this.costPerHour = 75;//£
+    this.prices = {
+        twitter * 0.25,
+        facebook * 0.25,
+        google * 0.4,
+        other * 0.15
+    };
 
     for(var prop in arguments[0])   {
         this[prop] = arguments[0][prop];
@@ -65,10 +71,10 @@ ContentPiece.prototype = {
 
     socialValue: function() {
         var content = this;
-        return (content.shares.twitter * 0.25)
-             + (content.shares.facebook * 0.25)
-             + (content.shares.google * 0.4)
-             + (content.shares.other * 0.15)
+        return (content.shares.twitter * content.prices.twitter)
+             + (content.shares.facebook * content.prices.facebook)
+             + (content.shares.google * content.prices.google)
+             + (content.shares.other * content.prices.other)
     },
 
     cost: function() {
