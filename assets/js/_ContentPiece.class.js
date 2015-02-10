@@ -6,10 +6,10 @@ var ContentPiece = function() {
     this.shares = {};
     this.costPerHour = 75;//£
     this.prices = {
-        twitter * 0.25,
-        facebook * 0.25,
-        google * 0.4,
-        other * 0.15
+        twitter: 0.25,
+        facebook: 0.25,
+        google: 0.4,
+        other: 0.15
     };
 
     for(var prop in arguments[0])   {
