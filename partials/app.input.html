@@ -7,31 +7,31 @@
 <div class='row'>
     <div class="form-group col-md-9">
         <label for="input-content-title">Title</label>
-        <input type="text" class="form-control" id="input-content-name" placeholder="Content name" value="9001 Reasons Why I'm Voting UKIP" />
+        <input type="text" class="form-control" ng-model='newPiece.name' id="input-content-name" placeholder="Content name" />
     </div>
     <div class="form-group col-md-3">
-        <label for="input-content-hours">Billable hours</label>
-        <input type="number" class="form-control" id="input-content-hours" placeholder="0" value='15' />
+        <label for="input-content-billableHours">Billable hours</label>
+        <input type="number" class="form-control" ng-model='newPiece.billableHours' id="input-content-billableHours" placeholder="0" />
     </div>
 </div>
 
 <div class='row'>
     <div class='col-md-6'>
         <div class="form-group">
-            <label for="input-content-url">Content's URL</label>
-            <input type="url" class="form-control" id="input-content-url" placeholder="Content URL" value='http://www.appliancecity.co.uk/chilli/' />
+            <label for="input-content-url">Cannonical URL</label>
+            <input type="url" class="form-control" ng-model='newPiece.url' id="input-content-url" placeholder="Content URL" />
         </div>
     </div>
     <div class='col-md-6'>
         <div class="form-group">
             <label for="input-content-links">Known external links</label>
-            <textarea class="form-control" rows="3" id="input-content-links" placeholder='List of known URLs, one per line'></textarea>
+            <textarea class="form-control" rows="3" ng-model='newPiece.links' id="input-content-links" placeholder='List of known URLs, one per line'></textarea>
         </div>
     </div>
 </div>
 
 <div class='row'>
     <div class='col-md-12'>
-        <button ui-sref='app.output.summary' id='btn-hunt-links' type="button" class="btn btn-primary btn-lg btn-block">Analyse this content</button>
+        <button ng-click='analyse()' id='btn-hunt-links' type="button" class="btn btn-primary btn-lg btn-block">Analyse this content</button>
     </div>
 </div>

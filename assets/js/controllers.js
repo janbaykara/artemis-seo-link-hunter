@@ -1,16 +1,27 @@
 angular.module("alchemy")
-    .controller('app', function($scope, $http) {
-
+    .controller('app', function($scope) {
+        // setInterval(function() {
+        //     console.log(ContentPiece.info)
+        // }, 1000);
     })
-    .controller('input', function($scope,ContentPiece) {
+    .controller('input', function($scope,$state,ContentPiece) {
+        $scope.newPiece = {
+            name: "Sample Content Piece (Chilli Table - Appliance City)",
+            url: "http://www.appliancecity.co.uk/chilli/",
+            billableHours: 10,
+            links: []
+        };
+
         $scope.analyse = function() {
             ContentPiece.new({
-                name: $scope.content.name,
-                url: $scope.content.url,
-                billableHours: $scope.content.hours
+                name: $scope.newPiece.name,
+                url: $scope.newPiece.url,
+                billableHours: $scope.newPiece.hours
             });
-            ContentPiece.getLinks(function(links) {
-                ContentPiece.getSocial(function(shares) {
+            ContentPiece.get.links(function(links) {
+                console.log(links);
+                ContentPiece.get.social(function(shares) {
+                    console.log(shares);
                     $state.go('app.output.summary');
                 });
             });
@@ -28,7 +39,7 @@ angular.module("alchemy")
             route:   'app.output.social'
         }];
 
-        $scope.ContentPiece = ContentPiece;
+        $scope.ContentPiece = ContentPiece.info;
     })
     .controller('summary', function($scope) {
         // Summary data analysis

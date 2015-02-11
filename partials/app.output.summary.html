@@ -1,4 +1,57 @@
 <div>
-    <h3>Summary</h3>
-    {{ContentPiece}}
+    <section>
+        <h3><span class='fa fa-money'></span> Cost breakdown</h3>
+        <div class='row'>
+            <div class='col-md-3'>
+                <h1>£{{ContentPiece.cost()}}</h1>
+                <span>Cost</span>
+            </div>
+            <div class='col-md-3'>
+                <h1>£{{ContentPiece.value()}}</h1>
+                <span>Calculated value</span>
+            </div>
+            <div class='col-md-3'>
+                <h1>£{{ContentPiece.earnings()}}</h1>
+                <span>Earnings</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h3>Links</h3>
+        <div class='row'>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-link'></span> {{ContentPiece.data.links.length}}</h1>
+                <span>Links</span>
+            </div>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-star'></span> {{ContentPiece.averageDA()|number:1}}</h1>
+                <span>Avg. DA</span>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <section>
+        <h3>Social shares</h3>
+        <div class='row'>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-twitter'></span> {{ContentPiece.data.shares.twitter}}</h1>
+                <span>Facebook likes + shares</span>
+            </div>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-facebook'></span> {{ContentPiece.data.shares.facebook}}</h1>
+                <span>Twitter shares</span>
+            </div>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-google-plus'></span> {{ContentPiece.data.shares.google}}</h1>
+                <span>Google Plus Ones</span>
+            </div>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-share-alt'></span> {{ContentPiece.data.shares.other}}</h1>
+                <span>Other social shares</span>
+            </div>
+        </div>
+    </section>
 </div>
