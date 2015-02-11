@@ -1,4 +1,4 @@
-var sharedCount = function(url, fn) {
+jQuery.sharedCount = function(url, fn) {
     url = encodeURIComponent(url || location.href);
     var apikey = sharedCount.key;
     var domain = sharedCount.url;

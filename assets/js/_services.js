@@ -56,7 +56,7 @@ angular.module("alchemy")
                 },
 
                 social: function(callback) {
-                    sharedCount(this.url, function(data){
+                    $.sharedCount(this.url, function(data){
                         content.shares = {
                             twitter: data.Twitter,
                             facebook: data.Facebook.like_count + data.Facebook.share_count,
