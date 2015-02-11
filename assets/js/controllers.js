@@ -5,11 +5,10 @@ angular.module("artemis")
     .controller('input', function($scope,$state,ContentPiece) {
 
         // Default values
-        $scope.newPiece = {
+        $scope.newPiece = defaultPiece = {
             name: "Sample Content Piece (Chilli Table - Appliance City)",
             url: "http://www.appliancecity.co.uk/chilli/",
-            billableHours: 10,
-            knownLinks: "www.awwwards.com/pausa\nwww.awwwards.com/Stibo"
+            billableHours: 10
         };
 
         // ng-click()
@@ -18,7 +17,7 @@ angular.module("artemis")
                 name: $scope.newPiece.name,
                 url: $scope.newPiece.url,
                 billableHours: $scope.newPiece.billableHours,
-                knownLinks: (typeof $scope.newPiece.knownLinks != 'undefined') ? $scope.newPiece.knownLinks.split("\n") : []
+                knownLinks: (typeof $scope.newPiece.knownLinks != 'undefined' && $scope.newPiece.knownLinks.length > 3) ? $scope.newPiece.knownLinks.split("\n") : []
             });
 
             ContentPiece.get.links(function(links) {

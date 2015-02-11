@@ -97,7 +97,6 @@ angular.module("artemis")
                                     });
                                     knownLinksData.push(linkObject)
                                 });
-                                console.log(knownLinksData);
 
                                 // Merge into found links dataset
                                 mergeByProperty(content.links,knownLinksData,'url');
