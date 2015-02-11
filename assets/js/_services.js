@@ -40,7 +40,7 @@ angular.module("artemis")
                         +"&Filter=equity" // links with equity
                         +"&LinkCols=4" // Flags full of data on each link
                         +"&TargetCols=256" // No. of links
-                        +"&SourceCols="+(4+68719476736) // URL + DA of source
+                        +"&SourceCols="+(4+16+68719476736) // URL + DA of source
                         +"&Limit=50";
 
                     $.ajax({
@@ -53,6 +53,7 @@ angular.module("artemis")
                             _.each(links, function(link) {
                                 var linkObject = new ContentLink({
                                     url: link.uu,
+                                    root: link.upl,
                                     domainAuthority: link.pda,
                                     known: false,
                                     relevant: true}

@@ -24,7 +24,7 @@
         <h3>All links</h3>
         <div class='row link-graph__row' ng-repeat='link in ContentPiece.data.links'>
             <div class='col-sm-6 link-graph__url'>
-                <a style='border-color: {{link.url|strToHSL}};'
+                <a style='border-color: {{link.root|strToHSL}};'
                     href='http://{{link.url}}'>{{link.url}}</a>
             </div>
             <div class='col-sm-6 link-graph__da-bar'>

@@ -1,5 +1,6 @@
 var ContentLink = function() {
     this.url = "";
+    this.root = "";
     this.domainAuthority = 0;
     this.known = false;
     this.relevant = true;
