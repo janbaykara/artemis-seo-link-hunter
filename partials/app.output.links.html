@@ -3,13 +3,13 @@
     <section>
         <h3>Link summary</h3>
         <div class='row'>
-            <div class='col-md-4'>
+            <div class='col-md-3'>
                 <h1><span class='fa fa-link'></span> {{ContentPiece.linkValue()|currency:"£"}}</h1>
                 <span>Link value</span>
             </div>
             <div class='col-md-2'>
-                <h1><span class='fa fa-link'></span> {{ContentPiece.data.links.length}}</h1>
-                <span># Links</span>
+                <h1><span class='fa fa-link'></span> {{ContentPiece.data.equitableLinkCount}}</h1>
+                <span># Equitable links</span>
             </div>
             <div class='col-md-2'>
                 <h1><span class='fa fa-star'></span> {{ContentPiece.averageDA()|number:1}}</h1>
@@ -34,6 +34,7 @@
             <thead>
                 <tr>
                     <th>Known?</th>
+                    <th>Equitable?</th>
                     <th>Relevant?</th>
                     <th>URL</th>
                     <th>Domain Auth</th>
@@ -42,7 +43,10 @@
             <tbody>
                 <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links'>
                     <td class='link-graph__relevance'>
-                        <input ng-model='link.known' type='checkbox' disabled/>
+                        <input ng-model='link.known' type='checkbox' disabled />
+                    </td>
+                    <td class='link-graph__relevance'>
+                        <input ng-model='link.equitable' type='checkbox' disabled />
                     </td>
                     <td class='link-graph__relevance'>
                         <input ng-model='link.relevant' type='checkbox' />

@@ -28,36 +28,52 @@ angular.module("artemis")
                 initialised = true;
                 content = defaultContent; // reset
 
-                for(var prop in arguments[0])   {
+                for (var prop in arguments[0]) {
                     content[prop] = arguments[0][prop];
                 }
             },
 
             get: {
-                links: function (callback) {
+                links: function(callback) {
                     $.ajax({
                         url: "mozapi.php",
                         type: "POST",
-                        data: { url:"/links/"
-                                    +encodeURIComponent(content.url)
-                                    +"?"
-                                    +"&Scope=page_to_page"
-                                    +"&Sort=domain_authority"
-                                    +"&Filter=equity" // links with equity
-                                    +"&LinkCols=4" // Flags full of data on each link
-                                    +"&TargetCols=256" // No. of links
-                                    +"&SourceCols="+(1+4+68719476736) // Canon URL + DA of source
-                                    +"&Limit=50"
+                        data: {
+                            url: "/links/" + encodeURIComponent(content.url)
+                                + "?"
+                                + "&Scope=page_to_page"
+                                + "&Sort=domain_authority"
+                                + "&Filter=equity"
+                                /**********
+                                *
+                                    nonequity
+                                        any of these attributes specified: nofollow, meta-nofollow, offscreen, 302 or an RSS feed
+                                    equity
+                                        not classified as non-equity, including followed links and 301 (permanent) redirects.
+                                *
+                                ***********/
+                                + "&LinkCols=2" // Flags full of data on each link
+                                + "&TargetCols=32" // No. of links
+                                + "&SourceCols=" + (4 + 68719476736) // Canon URL + DA of source
+                                + "&Limit=50"
                         },
-                        error: function (msg) {console.warn(msg);},
-                        success: function(res) { onReceiveLinks(JSON.parse(res)); }
+                        error: function(msg) {
+                            console.warn(msg);
+                        },
+                        success: function(res) {
+                            onReceiveLinks(JSON.parse(res));
+                        }
                     });
 
                     function onReceiveLinks(links) {
+                        content.equitableLinkCount = links[0].luueid;
+                        console.log(links[0].luueid, links)
+
                         _.each(links, function(link) {
                             var linkObject = new ContentLink({
                                 title: link.ut,
                                 url: link.uu,
+                                equitable: !lfBitFlag(link.lf),
                                 domainAuthority: link.pda,
                                 known: false,
                                 relevant: true
@@ -65,10 +81,10 @@ angular.module("artemis")
                             content.links.push(linkObject)
                         })
 
-                        if(content.knownLinks.length > 0) {
+                        if (content.knownLinks.length > 0) {
                             mergeInKnownLinks(callback);
                         } else {
-                            if(typeof callback == 'function') callback(content.links);
+                            if (typeof callback == 'function') callback(content.links);
                         }
                     }
 
@@ -76,12 +92,16 @@ angular.module("artemis")
                         $.ajax({
                             url: "mozapi.php",
                             type: "POST",
-                            data: { url: "/url-metrics/"
-                                        +"?"
-                                        +"&Cols="+(1+4+68719476736), // Canon URL + DA of source,
-                                    array: content.knownLinks
+                            data: {
+                                url: "/url-metrics/"
+                                   + "?"
+                                   + "&Cols="
+                                   + (4 + 68719476736), // Canon URL + DA of source,
+                                array: content.knownLinks
                             },
-                            error: function (msg) {console.warn(msg);},
+                            error: function(msg) {
+                                console.warn(msg);
+                            },
                             success: function(res) {
                                 var links = JSON.parse(res);
                                 var knownLinksData = [];
@@ -89,19 +109,20 @@ angular.module("artemis")
                                 // Turn into propa links
                                 _.each(links, function(link) {
                                     var linkObject = new ContentLink({
-                                        title: link.ut,
+                                        // title: link.ut,
                                         url: link.uu,
-                                        domainAuthority: link.pda,
+                                        // equitable: !lfBitFlag(link.lf),
+                                        // domainAuthority: link.pda,
                                         known: true,
-                                        relevant: true
+                                        // relevant: true
                                     });
                                     knownLinksData.push(linkObject)
                                 });
 
                                 // Merge into found links dataset
-                                mergeByProperty(content.links,knownLinksData,'url');
+                                mergeByProperty(content.links, knownLinksData, 'url');
 
-                                if(typeof callback == 'function') callback(content.links);
+                                if (typeof callback == 'function') callback(content.links);
                             }
                         });
                     }
@@ -112,14 +133,25 @@ angular.module("artemis")
                                 return arr1obj[prop] === arr2obj[prop];
                             });
 
-                            //If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
                             arr1obj ? _.extend(arr1obj, arr2obj) : arr1.push(arr2obj);
                         });
+                    }
+
+                    function lfBitFlag(input) {
+                        var bitflag = input;
+                        while(bitflag > 1) {
+                            bitflag -= nearestPow2(bitflag);
+                        }
+                        return (bitflag === 1) ? true : false;
+                    }
+
+                    function nearestPow2(aSize) {
+                        return Math.pow(2, Math.ceil(Math.log(aSize) / Math.log(2)));
                     }
                 },
 
                 social: function(callback) {
-                    $.sharedCount(content.url, function(data){
+                    $.sharedCount(content.url, function(data) {
                         content.shares = {
                             twitter: data.Twitter,
                             facebook: data.Facebook.like_count + data.Facebook.share_count,
@@ -132,7 +164,7 @@ angular.module("artemis")
                             reddit: data.Reddit,
                             stumbleupon: data.StumbleUpon
                         };
-                        if(typeof callback == 'function') {
+                        if (typeof callback == 'function') {
                             callback(content.shares);
                         }
                     });
@@ -143,7 +175,7 @@ angular.module("artemis")
             info: {
                 data: content,
 
-            // Useful calculations
+                // Useful calculations
 
                 linkValue: function() {
                     var totalLinkValue = 0;
@@ -154,17 +186,12 @@ angular.module("artemis")
                 },
 
                 socialValue: function(medium) {
-                    if(typeof medium != 'undefined') {
+                    if (typeof medium != 'undefined') {
                         return content.shares[medium] * (
-                            (typeof content.prices[medium] != 'undefined')
-                                ? content.prices[medium]
-                                : content.prices.other
+                            (typeof content.prices[medium] != 'undefined') ? content.prices[medium] : content.prices.other
                         )
                     } else {
-                        return (content.shares.twitter * content.prices.twitter)
-                             + (content.shares.facebook * content.prices.facebook)
-                             + (content.shares.google * content.prices.google)
-                             + (content.shares.other * content.prices.other)
+                        return (content.shares.twitter * content.prices.twitter) + (content.shares.facebook * content.prices.facebook) + (content.shares.google * content.prices.google) + (content.shares.other * content.prices.other)
                     }
                 },
 
@@ -172,31 +199,31 @@ angular.module("artemis")
                     return content.billableHours * content.costPerHour;
                 },
 
-                value: function () { //£
+                value: function() { //£
                     return ContentPiece.info.linkValue() + ContentPiece.info.socialValue();
                 },
 
-                profitloss: function () { //£
+                profitloss: function() { //£
                     return ContentPiece.info.value() - ContentPiece.info.cost()
                 },
 
-            // Informative summary calcs
+                // Informative summary calcs
 
                 averageDA: function() {
-                    return  _.reduce(content.links, function(stored,margin) {
-                                return stored + margin.domainAuthority;
-                            },0) / content.links.length;
+                    return _.reduce(content.links, function(stored, margin) {
+                        return stored + margin.domainAuthority;
+                    }, 0) / content.links.length;
                 },
 
                 socialCount: function() {
-                    return  _.reduce(content.social,function(a,b) {
-                                return a+b;
-                            }, 0)
+                    return _.reduce(content.shares, function(a, b) {
+                        return a + b;
+                    }, 0)
                 },
 
                 linkCount: function() {
                     return _.countBy(content.links, function(link) {
-                      return link.relevant ? 'relevant': 'nonrelevant';
+                        return link.relevant ? 'relevant' : 'nonrelevant';
                     });
                 }
             }

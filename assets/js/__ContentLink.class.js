@@ -3,6 +3,7 @@ var ContentLink = function() {
     this.domainAuthority = 0;
     this.known = false;
     this.relevant = true;
+    this.equitable = false;
     this.baseValue = 150;
     this.irrelevantLinkModifier = -50;
     this.relevantLinkModifier = 10;
@@ -13,10 +14,19 @@ var ContentLink = function() {
 }
 ContentLink.prototype = {
     value: function () {
-        var link = this;
+        var link = this
+          , domainValue = link.baseValue * ( link.domainAuthority / 100 + 1 );
 
-        return link.relevant ?
-            link.baseValue * ( link.domainAuthority / 100 + 1 ) + link.relevantLinkModifier :
-            link.baseValue * ( link.domainAuthority / 100 + 1 ) + link.irrelevantLinkModifier
+        if(link.equitable) {
+            console.log(link.url,link.equitable,"This HAS value");
+            var value = link.relevant
+                    ? domainValue + link.relevantLinkModifier
+                    : domainValue + link.irrelevantLinkModifier
+        } else {
+            var value = 0;
+            console.log(link.url,link.equitable,"NOT EQUITABLE value");
+        }
+
+        return value;
     },
 }
