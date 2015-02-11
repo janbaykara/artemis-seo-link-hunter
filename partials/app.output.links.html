@@ -7,13 +7,21 @@
                 <h1><span class='fa fa-link'></span> {{ContentPiece.linkValue()|currency:"£"}}</h1>
                 <span>Link value</span>
             </div>
-            <div class='col-md-3'>
+            <div class='col-md-2'>
                 <h1><span class='fa fa-link'></span> {{ContentPiece.data.links.length}}</h1>
                 <span># Links</span>
             </div>
-            <div class='col-md-3'>
+            <div class='col-md-2'>
                 <h1><span class='fa fa-star'></span> {{ContentPiece.averageDA()|number:1}}</h1>
                 <span>Avg. DA</span>
+            </div>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-thumbs-o-up'></span> {{ContentPiece.linkCount().relevant}}</h1>
+                <span># Relevant links</span>
+            </div>
+            <div class='col-md-2'>
+                <h1><span class='fa fa-thumbs-o-down'></span> {{ContentPiece.linkCount().nonrelevant}}</h1>
+                <span># Nonrelevant links</span>
             </div>
         </div>
     </section>

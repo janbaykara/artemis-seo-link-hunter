@@ -193,6 +193,12 @@ angular.module("artemis")
                                 return a+b;
                             }, 0)
                 },
+
+                linkCount: function() {
+                    return _.countBy(content.links, function(link) {
+                      return link.relevant ? 'relevant': 'nonrelevant';
+                    });
+                }
             }
         };
 
