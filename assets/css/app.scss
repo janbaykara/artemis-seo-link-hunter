@@ -1,5 +1,16 @@
 .link-graph {
-    &__url {
+
+    width: 100%;
+
+    &__relevance {
+      text-align: center;
+    }
+
+    &__da-bar {
+      width: 50%;
+    }
+
+    &__url * {
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;

@@ -22,29 +22,47 @@
 
     <section class='link-graph'>
         <h3>All links</h3>
-        <div class='row link-graph__row' ng-repeat='link in ContentPiece.data.links'>
-            <div class='col-sm-6 link-graph__url'>
-                <a href='http://{{link.url}}'>{{link.url}}</a>
-            </div>
-            <div class='col-sm-6 link-graph__da-bar'>
-                <div style='
-                    width:{{link.domainAuthority}}%;
-                    border-color: hsl(
-                        {{link.domainAuthority|normalise:0:100:45:0}},
-                        100%,
-                        50%
-                    );
-                    color: hsl(
-                        {{link.domainAuthority|normalise:0:100:45:0}},
-                        80%,
-                        40%
-                    )'>
-                    DA: {{link.domainAuthority|number:1}}
-                    &nbsp;
-                    {{link.value()|currency:"£"}}
-                </div>
-            </div>
-        </div>
+        <table class='link-graph'>
+            <thead>
+                <tr>
+                    <th>Known?</th>
+                    <th>Relevant?</th>
+                    <th>URL</th>
+                    <th>Domain Auth</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links'>
+                    <td class='link-graph__relevance'>
+                        <input ng-model='link.known' type='checkbox' disabled/>
+                    </td>
+                    <td class='link-graph__relevance'>
+                        <input ng-model='link.relevant' type='checkbox' />
+                    </td>
+                    <td class='link-graph__url'>
+                        <a href='http://{{link.url}}'>{{link.url}}</a>
+                    </td>
+                    <td class='link-graph__da-bar'>
+                        <div style='
+                            width:{{link.domainAuthority}}%;
+                            border-color: hsl(
+                                {{link.domainAuthority|normalise:0:100:45:0}},
+                                100%,
+                                50%
+                            );
+                            color: hsl(
+                                {{link.domainAuthority|normalise:0:100:45:0}},
+                                80%,
+                                40%
+                            )'>
+                            DA: {{link.domainAuthority|number:1}}
+                            &nbsp;
+                            {{link.value()|currency:"£"}}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </section>
 
 </div>
