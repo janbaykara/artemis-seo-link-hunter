@@ -2,11 +2,12 @@ angular.module("artemis")
     .factory('ContentPiece', function() {
         var init = false;
 
-        var content = {
+        var content = defaultContent = {
             name: "",
             url: "",
             billableHours: 0,
             links: [],
+            knownLinks: [],
             shares: {},
             costPerHour: 75,
             prices: {
@@ -25,6 +26,8 @@ angular.module("artemis")
 
             new: function() {
                 initialised = true;
+                content = defaultContent; // reset
+
                 for(var prop in arguments[0])   {
                     content[prop] = arguments[0][prop];
                 }
@@ -32,38 +35,88 @@ angular.module("artemis")
 
             get: {
                 links: function (callback) {
-                    var linksForURLapi = "/links/"
-                        +encodeURIComponent(content.url)
-                        +"?"
-                        +"&Scope=page_to_page"
-                        +"&Sort=domain_authority"
-                        +"&Filter=equity" // links with equity
-                        +"&LinkCols=4" // Flags full of data on each link
-                        +"&TargetCols=256" // No. of links
-                        +"&SourceCols="+(4+68719476736) // URL + DA of source
-                        +"&Limit=50";
-
                     $.ajax({
                         url: "mozapi.php",
                         type: "POST",
-                        data: {url:linksForURLapi},
+                        data: { url:"/links/"
+                                    +encodeURIComponent(content.url)
+                                    +"?"
+                                    +"&Scope=page_to_page"
+                                    +"&Sort=domain_authority"
+                                    +"&Filter=equity" // links with equity
+                                    +"&LinkCols=4" // Flags full of data on each link
+                                    +"&TargetCols=256" // No. of links
+                                    +"&SourceCols="+(1+4+68719476736) // Canon URL + DA of source
+                                    +"&Limit=50"
+                        },
                         error: function (msg) {console.warn(msg);},
-                        success: function(res){
-                            var links = JSON.parse(res);
-                            _.each(links, function(link) {
-                                var linkObject = new ContentLink({
-                                    url: link.uu,
-                                    domainAuthority: link.pda,
-                                    known: false,
-                                    relevant: true}
-                                );
-                                content.links.push(linkObject)
-                            })
-                            if(typeof callback == 'function') {
-                                callback(content.links);
-                            }
-                        }
+                        success: function(res) { onReceiveLinks(JSON.parse(res)); }
                     });
+
+                    function onReceiveLinks(links) {
+                        _.each(links, function(link) {
+                            var linkObject = new ContentLink({
+                                title: link.ut,
+                                url: link.uu,
+                                domainAuthority: link.pda,
+                                known: false,
+                                relevant: true
+                            });
+                            content.links.push(linkObject)
+                        })
+
+                        if(content.knownLinks.length > 0) {
+                            mergeInKnownLinks(callback);
+                        } else {
+                            if(typeof callback == 'function') callback(content.links);
+                        }
+                    }
+
+                    function mergeInKnownLinks(cb) {
+                        $.ajax({
+                            url: "mozapi.php",
+                            type: "POST",
+                            data: { url: "/url-metrics/"
+                                        +"?"
+                                        +"&Cols="+(1+4+68719476736), // Canon URL + DA of source,
+                                    array: content.knownLinks
+                            },
+                            error: function (msg) {console.warn(msg);},
+                            success: function(res) {
+                                var links = JSON.parse(res);
+                                var knownLinksData = [];
+
+                                // Turn into propa links
+                                _.each(links, function(link) {
+                                    var linkObject = new ContentLink({
+                                        title: link.ut,
+                                        url: link.uu,
+                                        domainAuthority: link.pda,
+                                        known: true,
+                                        relevant: true
+                                    });
+                                    knownLinksData.push(linkObject)
+                                });
+                                console.log(knownLinksData);
+
+                                // Merge into found links dataset
+                                mergeByProperty(content.links,knownLinksData,'url');
+
+                                if(typeof callback == 'function') callback(content.links);
+                            }
+                        });
+                    }
+
+                    function mergeByProperty(arr1, arr2, prop) {
+                        _.each(arr2, function(arr2obj) {
+                            var arr1obj = _.find(arr1, function(arr1obj) {
+                                return arr1obj[prop] === arr2obj[prop];
+                            });
+
+                            //If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
+                            arr1obj ? _.extend(arr1obj, arr2obj) : arr1.push(arr2obj);
+                        });
+                    }
                 },
 
                 social: function(callback) {
@@ -73,7 +126,6 @@ angular.module("artemis")
                             facebook: data.Facebook.like_count + data.Facebook.share_count,
                             google: data.GooglePlusOne,
                             other: data.Buzz + data.Delicious + data.LinkedIn + data.Pinterest + data.Reddit + data.StumbleUpon,
-                            // Other shit
                             buzz: data.Buzz,
                             delicious: data.Delicious,
                             linkedin: data.LinkedIn,
@@ -104,10 +156,11 @@ angular.module("artemis")
 
                 socialValue: function(medium) {
                     if(typeof medium != 'undefined') {
-                        if(_.any(['twitter','facebook','google'],function(x) { return x == medium } ))
-                            return content.shares[medium] * content.prices[medium]
-                        else
-                            return content.shares[medium] * content.prices.other;
+                        return content.shares[medium] * (
+                            (typeof content.prices[medium] != 'undefined')
+                                ? content.prices[medium]
+                                : content.prices.other
+                        )
                     } else {
                         return (content.shares.twitter * content.prices.twitter)
                              + (content.shares.facebook * content.prices.facebook)

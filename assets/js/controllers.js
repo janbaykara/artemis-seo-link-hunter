@@ -9,12 +9,17 @@ angular.module("artemis")
             name: "Sample Content Piece (Chilli Table - Appliance City)",
             url: "http://www.appliancecity.co.uk/chilli/",
             billableHours: 10,
-            links: []
+            knownLinks: "www.awwwards.com/pausa\nwww.awwwards.com/Stibo"
         };
 
         // ng-click()
         $scope.analyse = function() {
-            ContentPiece.new($scope.newPiece);
+            ContentPiece.new({
+                name: $scope.newPiece.name,
+                url: $scope.newPiece.url,
+                billableHours: $scope.newPiece.billableHours,
+                knownLinks: (typeof $scope.newPiece.knownLinks != 'undefined') ? $scope.newPiece.knownLinks.split("\n") : []
+            });
 
             ContentPiece.get.links(function(links) {
                 ContentPiece.get.social(function(shares) {
