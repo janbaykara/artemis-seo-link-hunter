@@ -1,10 +1,10 @@
-angular.module("alchemy")
-    .controller('app', function($scope) {
-        // setInterval(function() {
-        //     console.log(ContentPiece.info)
-        // }, 1000);
+angular.module("artemis")
+    .controller('app', function($scope,$state) {
+        $scope._ = _;
     })
     .controller('input', function($scope,$state,ContentPiece) {
+
+        // Default values
         $scope.newPiece = {
             name: "Sample Content Piece (Chilli Table - Appliance City)",
             url: "http://www.appliancecity.co.uk/chilli/",
@@ -12,22 +12,18 @@ angular.module("alchemy")
             links: []
         };
 
+        // ng-click()
         $scope.analyse = function() {
-            ContentPiece.new({
-                name: $scope.newPiece.name,
-                url: $scope.newPiece.url,
-                billableHours: $scope.newPiece.hours
-            });
+            ContentPiece.new($scope.newPiece);
+
             ContentPiece.get.links(function(links) {
-                console.log(links);
                 ContentPiece.get.social(function(shares) {
-                    console.log(shares);
                     $state.go('app.output.summary');
                 });
             });
         }
     })
-    .controller('output', function($scope,ContentPiece) {
+    .controller('output', function($scope,$state,ContentPiece) {
         $scope.outputTabs = [{
             heading: 'Summary',
             route:   'app.output.summary'

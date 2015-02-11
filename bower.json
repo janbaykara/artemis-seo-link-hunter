@@ -5,6 +5,10 @@
     "jquery": "*",
     "angularjs": "*",
     "angular-ui-router": "*",
-    "angular-ui-router-tabs": "~1.2.0"
+    "angular-ui-router-tabs": "~1.2.0",
+    "angular-datavis": "~1.1.1"
+  },
+  "resolutions": {
+    "angular-datavis": "~1.1.0"
   }
 }

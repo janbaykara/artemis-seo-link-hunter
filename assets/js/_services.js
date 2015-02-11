@@ -1,6 +1,8 @@
-angular.module("alchemy")
+angular.module("artemis")
     .factory('ContentPiece', function() {
-        content = {
+        var init = false;
+
+        var content = {
             name: "",
             url: "",
             billableHours: 0,
@@ -15,9 +17,14 @@ angular.module("alchemy")
             }
         };
 
-        var obj = {
+        var ContentPiece = {
+
+            initialised: function() {
+                return init;
+            },
 
             new: function() {
+                initialised = true;
                 for(var prop in arguments[0])   {
                     content[prop] = arguments[0][prop];
                 }
@@ -44,11 +51,15 @@ angular.module("alchemy")
                         success: function(res){
                             var links = JSON.parse(res);
                             _.each(links, function(link) {
-                                var linkObject = new ContentLink({url: link.uu, domainAuthority: link.pda, known: false, relevant: true });
+                                var linkObject = new ContentLink({
+                                    url: link.uu,
+                                    domainAuthority: link.pda,
+                                    known: false,
+                                    relevant: true}
+                                );
                                 content.links.push(linkObject)
                             })
                             if(typeof callback == 'function') {
-                                console.log("get.links(callback)()")
                                 callback(content.links);
                             }
                         }
@@ -56,59 +67,82 @@ angular.module("alchemy")
                 },
 
                 social: function(callback) {
-                    $.sharedCount(this.url, function(data){
+                    $.sharedCount(content.url, function(data){
                         content.shares = {
                             twitter: data.Twitter,
                             facebook: data.Facebook.like_count + data.Facebook.share_count,
                             google: data.GooglePlusOne,
-                            other: data.Buzz + data.Delicious + data.LinkedIn + data.Pinterest + data.Reddit + data.StumbleUpon
+                            other: data.Buzz + data.Delicious + data.LinkedIn + data.Pinterest + data.Reddit + data.StumbleUpon,
+                            // Other shit
+                            buzz: data.Buzz,
+                            delicious: data.Delicious,
+                            linkedin: data.LinkedIn,
+                            pinterest: data.Pinterest,
+                            reddit: data.Reddit,
+                            stumbleupon: data.StumbleUpon
                         };
                         if(typeof callback == 'function') {
-                            console.log("get.social(callback)()")
                             callback(content.shares);
                         }
                     });
                 }
             },
 
+
             info: {
                 data: content,
 
-                averageDA: function() {
-                    return sumOfDA = _.reduce(content.links, function(stored,margin) {
-                        return stored + margin.domainAuthority;
-                    },0) / content.links.length;
-                },
+            // Useful calculations
 
                 linkValue: function() {
                     var totalLinkValue = 0;
-
                     _.each(content.links, function(link) {
                         totalLinkValue += link.value();
                     });
                     return totalLinkValue;
                 },
 
-                socialValue: function() {
-                    return (content.shares.twitter * content.prices.twitter)
-                         + (content.shares.facebook * content.prices.facebook)
-                         + (content.shares.google * content.prices.google)
-                         + (content.shares.other * content.prices.other)
+                socialValue: function(medium) {
+                    if(typeof medium != 'undefined') {
+                        if(_.any(['twitter','facebook','google'],function(x) { return x == medium } ))
+                            return content.shares[medium] * content.prices[medium]
+                        else
+                            return content.shares[medium] * content.prices.other;
+                    } else {
+                        return (content.shares.twitter * content.prices.twitter)
+                             + (content.shares.facebook * content.prices.facebook)
+                             + (content.shares.google * content.prices.google)
+                             + (content.shares.other * content.prices.other)
+                    }
                 },
 
                 cost: function() { //£
                     return content.billableHours * content.costPerHour;
                 },
 
-                value: function (callback) {
-                    return obj.info.linkValue() + obj.info.socialValue();
+                value: function () { //£
+                    return ContentPiece.info.linkValue() + ContentPiece.info.socialValue();
                 },
 
-                earnings: function (billableHours, contentValue) { //£
-                    return obj.info.value() - obj.info.cost()
-                }
+                profitloss: function () { //£
+                    return ContentPiece.info.value() - ContentPiece.info.cost()
+                },
+
+            // Informative summary calcs
+
+                averageDA: function() {
+                    return  _.reduce(content.links, function(stored,margin) {
+                                return stored + margin.domainAuthority;
+                            },0) / content.links.length;
+                },
+
+                socialCount: function() {
+                    return  _.reduce(content.social,function(a,b) {
+                                return a+b;
+                            }, 0)
+                },
             }
         };
 
-        return obj;
+        return ContentPiece;
     });

@@ -8,8 +8,8 @@ var sharedCount = {
     "url": "//free.sharedcount.com"
 }
 
-angular.module('alchemy', ['ui.router', 'ui.bootstrap', 'ui.router.tabs'])
-    .config(function($stateProvider,$urlRouterProvider,$httpProvider) {
+angular.module('artemis', ['ui.router', 'ui.bootstrap', 'ui.router.tabs', 'utils.dataVis'])
+    .config(function($stateProvider,$locationProvider,$urlRouterProvider,$httpProvider) {
 
         $stateProvider
             .state('app', {
@@ -23,7 +23,7 @@ angular.module('alchemy', ['ui.router', 'ui.bootstrap', 'ui.router.tabs'])
                 }
             })
             .state('app.input', {
-                url: "/",
+                url: "/input",
                 views: {
                     "main": {
                         templateUrl: "partials/app.input.html",
@@ -58,4 +58,10 @@ angular.module('alchemy', ['ui.router', 'ui.bootstrap', 'ui.router.tabs'])
             })
 
             $urlRouterProvider.otherwise("/");
+            // $locationProvider.html5Mode(true);
     })
+    .run(function($rootScope, $location, $state) {
+        // $rootScope.$on('$stateChangeStart', function(e, toState, toParams, fromState, fromParams) {
+            $state.go('app.input');
+        // });
+    });

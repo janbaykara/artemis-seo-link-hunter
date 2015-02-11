@@ -3,19 +3,25 @@
         <h3><span class='fa fa-money'></span> Cost breakdown</h3>
         <div class='row'>
             <div class='col-md-3'>
-                <h1>£{{ContentPiece.cost()}}</h1>
+                <h1>{{ContentPiece.cost()|currency:"£"}}</h1>
                 <span>Cost</span>
             </div>
             <div class='col-md-3'>
-                <h1>£{{ContentPiece.value()}}</h1>
+                <h1>{{ContentPiece.value()|currency:"£"}}</h1>
                 <span>Calculated value</span>
             </div>
             <div class='col-md-3'>
-                <h1>£{{ContentPiece.earnings()}}</h1>
-                <span>Earnings</span>
+                <h1 style='color: hsl(
+                    {{ContentPiece.profitloss()|normalise:-1000:1000:0:135}},
+                    100%,
+                    40%
+                )'>{{ContentPiece.profitloss()|currency:"£"}}</h1>
+                <span>Profit/loss</span>
             </div>
         </div>
     </section>
+
+    <hr>
 
     <section>
         <h3>Links</h3>
@@ -35,6 +41,7 @@
 
     <section>
         <h3>Social shares</h3>
+        {{ ContentPiece.socialShares() }}
         <div class='row'>
             <div class='col-md-2'>
                 <h1><span class='fa fa-twitter'></span> {{ContentPiece.data.shares.twitter}}</h1>

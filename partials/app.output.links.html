@@ -1,3 +1,51 @@
 <div>
-    <h3>Links</h3>
+
+    <section>
+        <h3>Link summary</h3>
+        <div class='row'>
+            <div class='col-md-4'>
+                <h1><span class='fa fa-link'></span> {{ContentPiece.linkValue()|currency:"£"}}</h1>
+                <span>Link value</span>
+            </div>
+            <div class='col-md-3'>
+                <h1><span class='fa fa-link'></span> {{ContentPiece.data.links.length}}</h1>
+                <span># Links</span>
+            </div>
+            <div class='col-md-3'>
+                <h1><span class='fa fa-star'></span> {{ContentPiece.averageDA()|number:1}}</h1>
+                <span>Avg. DA</span>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class='link-graph'>
+        <h3>All links</h3>
+        <div class='row link-graph__row' ng-repeat='link in ContentPiece.data.links'>
+            <div class='col-sm-6 link-graph__url'>
+                <a style='border-color: {{link.url|strToHSL}};'
+                    href='http://{{link.url}}'>{{link.url}}</a>
+            </div>
+            <div class='col-sm-6 link-graph__da-bar'>
+                <div style='
+                    width:{{link.domainAuthority}}%;
+                    border-color: hsl(
+                        {{link.domainAuthority|normalise:0:100:45:0}},
+                        100%,
+                        50%
+                    );
+                    color: hsl(
+                        {{link.domainAuthority|normalise:0:100:45:0}},
+                        80%,
+                        40%
+                    )'>
+                    DA: {{link.domainAuthority|number:1}}
+                    &nbsp;
+                    {{link.value()|currency:"£"}}
+                </div>
+            </div>
+        </div>
+    </section>
+
 </div>

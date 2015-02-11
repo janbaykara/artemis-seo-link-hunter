@@ -1,0 +1,16 @@
+.link-graph {
+    &__url {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-size: 80%;
+    }
+
+    &__da-bar div {
+      padding: 5px 0;
+      border-top: 2px solid red;
+      text-align: right;
+      font-weight: bold;
+      font-size: 80%;
+    }
+}
