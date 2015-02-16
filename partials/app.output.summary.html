@@ -35,7 +35,7 @@
                 <span>Avg. DA</span>
             </div>
             <div class='col-md-2'>
-                <h1>{{ ContentPiece.stats.value() / ContentPiece.data.links.length |currency:"£"}}</h1>
+                <h1>{{ ContentPiece.stats.value() / ContentPiece.stats.equitableLinkCount() |currency:"£"}}</h1>
                 <span>Avg. link value</span>
             </div>
         </div>

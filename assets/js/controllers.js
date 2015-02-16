@@ -8,7 +8,7 @@ angular.module("artemis")
         $scope.newPiece = {
             name: "Sample Content Piece (Chilli Table - Appliance City)",
             url: "http://www.appliancecity.co.uk/chilli/",
-            billableHours: 15
+            billableHours: 30
         };
 
         // ng-click()
