@@ -74,7 +74,7 @@ angular.module("artemis-content",[])
                         else return link.shares;
                     });
                 } else {
-                    // console.log(link.url+" has already had social analysis done")
+                    console.log("Retrieving from stored.")
                         if (typeof callback == 'function')
                             callback(link.shares);
                         else return link.shares;
@@ -136,17 +136,14 @@ angular.module("artemis-content",[])
                                 //     console.log(link.url,link.social().facebook.count);
                                 // })
                                 ContentPiece.stats.secondarySocialCombined =
-                                    _.reduce(ContentPiece.data.links, function(acc, margin) {
-                                        var o = margin.shares;
-                                        for (var p in o) {
-                                            marginalCount = (typeof acc[p] != 'undefined') ? acc[p].count : 0;
-                                            acc[p] = _.clone(o[p]);
-                                            if(p == 'count') {
-                                                acc[p].count = acc[p].count + marginalCount;
-                                            }
+                                    _.reduce(ContentPiece.data.links, function(sum, nextLink) {
+                                        for (var medium in nextLink.shares) {
+                                            nextLink.shares[medium].count += (typeof sum[medium] != 'undefined') ? sum[medium].count : 0;
+                                            sum[medium] = _.clone(nextLink.shares[medium]);
                                         }
-                                        return acc;
+                                        return sum;
                                     }, {});
+
                                 if (typeof callback == 'function') callback(ContentPiece.stats.secondarySocialCombined);
                             }
                         });
