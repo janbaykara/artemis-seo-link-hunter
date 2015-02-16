@@ -162,7 +162,7 @@ angular.module("artemis-content",[])
                                 + "?"
                                 + "&Scope=page_to_page"
                                 + "&Sort=domain_authority"
-                                + "&Filter=equity"
+                                // + "&Filter=equity"
                                 /**********
                                 *
                                     nonequity
@@ -368,15 +368,30 @@ angular.module("artemis-content",[])
             },
 
             nearestPow2: function(aSize) {
-                return Math.pow(2, Math.ceil(Math.log(aSize) / Math.log(2)));
+                return Math.pow(2, Math.floor(Math.log(aSize) / Math.log(2)));
             },
 
             lfBitFlag: function(input) {
-                var bitflag = input;
-                while(bitflag > 1) {
-                    bitflag -= Utils.nearestPow2(bitflag);
+                // console.log("---");
+                // console.log(input);
+                var bitpointer = input,
+                    bitFlags = [],
+                    nearestSmallerSquare = Utils.nearestPow2(bitpointer)
+
+                do {
+                    nearestSmallerSquare = Utils.nearestPow2(bitpointer);
+                    // console.log(bitpointer,"-",nearestSmallerSquare)
+                    bitpointer -= nearestSmallerSquare;
+                    bitFlags.push(nearestSmallerSquare);
                 }
-                return (bitflag === 1) ? true : false;
+                while (bitpointer > 0)
+
+                isNoFollow = _.any(bitFlags, function(bitflag) {
+                    return bitflag === 1;
+                })
+                // console.log(bitFlags)
+                // console.log("Nofollow: "+isNoFollow);
+                return isNoFollow;
             },
 
             parseUri: function(str) {
