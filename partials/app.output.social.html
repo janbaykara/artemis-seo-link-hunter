@@ -2,12 +2,20 @@
     <section class='row'>
         <h3 class='col-md-12'>Social summary</h3>
         <div class='col-md-3'>
-            <h1>{{ContentPiece.socialCount()}}</h1>
-            <span>Total shares</span>
+            <h1>{{ContentPiece.stats.socialCount()}}</h1>
+            <span>Primary shares</span>
         </div>
         <div class='col-md-3'>
-            <h1>{{ContentPiece.socialValue()|currency:"£"}}</h1>
-            <span>Calculated value</span>
+            <h1>{{ContentPiece.stats.socialCount(ContentPiece.stats.secondarySocialCombined)}}</h1>
+            <span>Secondary shares</span>
+        </div>
+        <div class='col-md-3'>
+            <h1>{{ContentPiece.stats.socialValue()|currency:"£"}}</h1>
+            <span>Value of primary shares</span>
+        </div>
+        <div class='col-md-3'>
+            <h1>{{ContentPiece.stats.socialValue("*",ContentPiece.stats.secondarySocialCombined)|currency:"£"}}</h1>
+            <span>(Experimental) value of secondary shares</span>
         </div>
     </section>
 
@@ -17,7 +25,7 @@
         <h3 class='col-md-12'>Sharing breakdown</h3>
         <div class='col-md-3' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance <= 1'>
             <h1><span class='{{medium.icon}}'></span> {{medium.count}}</h1>
-            <h2>{{ContentPiece.socialValue(mediumID)|currency:"£"}}</h2>
+            <h2>{{ContentPiece.stats.socialValue(mediumID)|currency:"£"}}</h2>
             <span>{{medium.name}}</span>
         </div>
     </section>
@@ -30,7 +38,7 @@
             <span class='{{medium.icon}}'></span><br>
             <strong>{{medium.name}}</strong><br>
             # {{medium.count}}<br>
-            {{ContentPiece.socialValue(mediumID)|currency:"£"}}
+            {{ContentPiece.stats.socialValue(mediumID)|currency:"£"}}
         </div>
     </section>
 </div>

@@ -4,23 +4,23 @@
         <h3>Link summary</h3>
         <div class='row'>
             <div class='col-md-3'>
-                <h1><span class='fa fa-link'></span> {{ContentPiece.linkValue()|currency:"£"}}</h1>
+                <h1><span class='fa fa-link'></span> {{ContentPiece.stats.linkValue()|currency:"£"}}</h1>
                 <span>Equitable link value</span>
             </div>
             <div class='col-md-2'>
-                <h1><span class='fa fa-star'></span> {{ContentPiece.averageDA()|number:1}}</h1>
+                <h1><span class='fa fa-star'></span> {{ContentPiece.stats.averageDA()|number:1}}</h1>
                 <span>Avg. DA</span>
             </div>
             <div class='col-md-2'>
-                <h1><span class='fa fa-link'></span> {{ContentPiece.data.equitableLinkCount}}</h1>
+                <h1><span class='fa fa-link'></span> {{ContentPiece.stats.equitableLinkCount()}}</h1>
                 <span># Equitable links</span>
             </div>
             <div class='col-md-2'>
-                <h1><span class='fa fa-thumbs-o-up'></span> {{ContentPiece.linkCount().relevant}}</h1>
+                <h1><span class='fa fa-thumbs-o-up'></span> {{ContentPiece.stats.linkCount().relevant}}</h1>
                 <span># Relevant links</span>
             </div>
             <div class='col-md-2'>
-                <h1><span class='fa fa-thumbs-o-down'></span> {{ContentPiece.linkCount().nonrelevant}}</h1>
+                <h1><span class='fa fa-thumbs-o-down'></span> {{ContentPiece.stats.linkCount().nonrelevant}}</h1>
                 <span># Nonrelevant links</span>
             </div>
         </div>
@@ -36,12 +36,13 @@
                     <th>Known?</th>
                     <th>Equitable?</th>
                     <th>Relevant?</th>
+                    <th>Included?</th>
                     <th>URL</th>
                     <th>Domain Auth</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links'>
+                <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links' ng-class='{dupe: !link.included}'>
                     <td class='link-graph__relevance'>
                         <input ng-model='link.known' type='checkbox' disabled />
                     </td>
@@ -51,10 +52,13 @@
                     <td class='link-graph__relevance'>
                         <input ng-model='link.relevant' type='checkbox' />
                     </td>
+                    <td class='link-graph__relevance'>
+                        <input ng-model='link.included' type='checkbox' />
+                    </td>
                     <td class='link-graph__url'>
                         <div class='tr'>
-                            <a href='http://{{link.url}}' class='label link-graph__authority' style='color: {{link.parseUri().authority|strToHSL}}; background: {{link.parseUri().authority|strToHSL}}'>{{link.parseUri().authority}}</a>
-                            <a class='link-graph__source' href='http://{{link.url}}'>{{link.parseUri().relative}}</a>
+                            <a href='{{link.url}}' target='_blank' class='label link-graph__authority' style='color: {{link.domain|strToHSL}}; background: {{link.domain|strToHSL}}'>{{link.domain}}</a>
+                            <a class='link-graph__source' href='{{link.url}}' target='_blank'>{{link.parseUri().relative}}</a>
                         </div>
                     </td>
                     <td class='link-graph__da-bar'>

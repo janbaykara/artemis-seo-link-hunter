@@ -5,7 +5,7 @@ angular.module("artemis")
     .controller('input', function($scope,$state,ContentPiece) {
 
         // Default values
-        $scope.newPiece = defaultPiece = {
+        $scope.newPiece = {
             name: "Sample Content Piece (Chilli Table - Appliance City)",
             url: "http://www.appliancecity.co.uk/chilli/",
             billableHours: 15
@@ -22,7 +22,9 @@ angular.module("artemis")
 
             ContentPiece.get.links(function(links) {
                 ContentPiece.get.social(function(shares) {
-                    $state.go('app.output.summary');
+                    ContentPiece.get.secondDegreeSocial(function(secondaryShares) {
+                        $state.go('app.output.summary');
+                    })
                 });
             });
         }
@@ -39,7 +41,7 @@ angular.module("artemis")
             route:   'app.output.social'
         }];
 
-        $scope.ContentPiece = ContentPiece.info;
+        $scope.ContentPiece = ContentPiece;
     })
     .controller('summary', function($scope) {
         // Summary data analysis

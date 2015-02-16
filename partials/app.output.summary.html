@@ -3,19 +3,19 @@
         <h3><span class='fa fa-money'></span> Cost breakdown</h3>
         <div class='row'>
             <div class='col-md-3'>
-                <h1>{{ContentPiece.cost()|currency:"£"}}</h1>
+                <h1>{{ContentPiece.stats.cost()|currency:"£"}}</h1>
                 <span>Cost</span>
             </div>
             <div class='col-md-3'>
-                <h1>{{ContentPiece.value()|currency:"£"}}</h1>
+                <h1>{{ContentPiece.stats.value()|currency:"£"}}</h1>
                 <span>Calculated value</span>
             </div>
             <div class='col-md-3'>
                 <h1 style='color: hsl(
-                    {{ContentPiece.profitloss()|normalise:-1000:1000:0:135}},
+                    {{ContentPiece.stats.profitloss()|normalise:-1000:1000:0:135}},
                     100%,
                     40%
-                )'>{{ContentPiece.profitloss()|currency:"£"}}</h1>
+                )'>{{ContentPiece.stats.profitloss()|currency:"£"}}</h1>
                 <span>Profit/loss</span>
             </div>
         </div>
@@ -31,11 +31,11 @@
                 <span>Equitable inks</span>
             </div>
             <div class='col-md-2'>
-                <h1><span class='fa fa-star'></span> {{ContentPiece.averageDA()|number:1}}</h1>
+                <h1><span class='fa fa-star'></span> {{ContentPiece.stats.averageDA()|number:1}}</h1>
                 <span>Avg. DA</span>
             </div>
             <div class='col-md-2'>
-                <h1>{{ ContentPiece.value() / ContentPiece.data.links.length |currency:"£"}}</h1>
+                <h1>{{ ContentPiece.stats.value() / ContentPiece.data.links.length |currency:"£"}}</h1>
                 <span>Avg. link value</span>
             </div>
         </div>
@@ -47,11 +47,11 @@
         <h3>Social shares</h3>
         <div class='row'>
             <div class='col-md-2'>
-                <h1>{{ContentPiece.socialCount()}}</h1>
+                <h1>{{ContentPiece.stats.socialCount()}}</h1>
                 <span>Total shares</span>
             </div>
             <div class='col-md-2'>
-                <h1>{{ContentPiece.socialValue()|currency:"£"}}</h1>
+                <h1>{{ContentPiece.stats.socialValue()|currency:"£"}}</h1>
                 <span>Calculated value</span>
             </div>
         </div>
