@@ -132,21 +132,22 @@ angular.module("artemis-content",[])
                     _.each(ContentPiece.data.links, function(link,i) {
                         link.social(function() {
                             if(i+1== ContentPiece.data.links.length) {
-                                // _.each(ContentPiece.data.links, function(link) {
-                                //     console.log(link.url,link.social().facebook.count);
-                                // })
                                 ContentPiece.stats.secondarySocialCombined =
-                                    _.reduce(ContentPiece.data.links, function(acc, margin) {
-                                        var o = margin.shares;
-                                        for (var p in o) {
-                                            marginalCount = (typeof acc[p] != 'undefined') ? acc[p].count : 0;
-                                            acc[p] = _.clone(o[p]);
-                                            if(p == 'count') {
-                                                acc[p].count = acc[p].count + marginalCount;
+                                    _.reduce(ContentPiece.data.links, function(combined, margin) {
+                                        var thisLinkSocial = margin.shares;
+                                        console.log(thisLinkSocial);
+                                        if(typeof thisLinkSocial != 'undefined' && thisLinkSocial != null) {
+                                            for (var p in thisLinkSocial) {
+                                                marginalCount = (typeof combined[p] != 'undefined') ? combined[p].count : 0;
+                                                combined[p] = _.clone(thisLinkSocial[p]);
+                                                if(p == 'count') {
+                                                    combined[p].count = combined[p].count + marginalCount;
+                                                }
                                             }
                                         }
-                                        return acc;
+                                        return combined;
                                     }, {});
+                                console.log(ContentPiece.stats.secondarySocialCombined);
                                 if (typeof callback == 'function') callback(ContentPiece.stats.secondarySocialCombined);
                             }
                         });
@@ -162,15 +163,6 @@ angular.module("artemis-content",[])
                                 + "?"
                                 + "&Scope=page_to_page"
                                 + "&Sort=domain_authority"
-                                // + "&Filter=equity"
-                                /**********
-                                *
-                                    nonequity
-                                        any of these attributes specified: nofollow, meta-nofollow, offscreen, 302 or an RSS feed
-                                    equity
-                                        not classified as non-equity, including followed links and 301 (permanent) redirects.
-                                *
-                                ***********/
                                 + "&LinkCols=2" // Flags full of data on each link
                                 + "&TargetCols=32" // No. of links
                                 + "&SourceCols=" + (4 + 34359738368 + 68719476736) // Canon URL + PDA + DA of source
