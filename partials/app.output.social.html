@@ -15,36 +15,22 @@
 
     <section class='row'>
         <h3 class='col-md-12'>Sharing breakdown</h3>
-        <div class='col-md-3'>
-            <h1><span class='fa fa-twitter'></span> {{ContentPiece.data.shares.twitter}}</h1>
-            <h2>{{ContentPiece.socialValue('twitter')|currency:"£"}}</h2>
-            <span>Twitter mentions</span>
-        </div>
-        <div class='col-md-3'>
-            <h1><span class='fa fa-facebook'></span> {{ContentPiece.data.shares.facebook}}</h1>
-            <h2>{{ContentPiece.socialValue('facebook')|currency:"£"}}</h2>
-            <span>Facebook likes + shares</span>
-        </div>
-        <div class='col-md-3'>
-            <h1><span class='fa fa-google-plus'></span> {{ContentPiece.data.shares.google}}</h1>
-            <h2>{{ContentPiece.socialValue('google')|currency:"£"}}</h2>
-            <span>Google +1's</span>
-        </div>
-        <div class='col-md-3'>
-            <h1><span class='fa fa-share-alt'></span> {{ContentPiece.data.shares.other}}</h1>
-            <h2>{{ContentPiece.socialValue('other')|currency:"£"}}</h2>
-            <span>Other social shares</span>
+        <div class='col-md-3' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance <= 1'>
+            <h1><span class='{{medium.icon}}'></span> {{medium.count}}</h1>
+            <h2>{{ContentPiece.socialValue(mediumID)|currency:"£"}}</h2>
+            <span>{{medium.name}}</span>
         </div>
     </section>
 
     <hr>
 
     <section class='row'>
-        <h4 class='col-md-12'>All social media</h4>
-        <div class='col-md-2' ng-repeat='(mediumName,mediumData) in ContentPiece.data.shares'>
-            <h5>{{mediumName}}</h5>
-            #{{mediumData}}<br>
-            {{ContentPiece.socialValue(mediumName)|currency:"£"}}
+        <h4 class='col-md-12'>Other social media</h4>
+        <div class='col-md-2' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance > 1'>
+            <span class='{{medium.icon}}'></span><br>
+            <strong>{{medium.name}}</strong><br>
+            # {{medium.count}}<br>
+            {{ContentPiece.socialValue(mediumID)|currency:"£"}}
         </div>
     </section>
 </div>

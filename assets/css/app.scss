@@ -14,6 +14,12 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      font-size: 90%;
+      line-height: 1.5em;
+    }
+
+    &__authority {
+      color: white !important;
       font-size: 80%;
     }
 

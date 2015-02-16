@@ -8,7 +8,7 @@ var sharedCount = {
     "url": "//free.sharedcount.com"
 }
 
-angular.module('artemis', ['ui.router', 'ui.bootstrap', 'ui.router.tabs', 'utils.dataVis'])
+angular.module('artemis', ['ui.router', 'ui.bootstrap', 'ui.router.tabs', 'utils.dataVis','artemis-content'])
     .config(function($stateProvider,$locationProvider,$urlRouterProvider,$httpProvider) {
 
         $stateProvider
