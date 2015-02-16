@@ -162,18 +162,9 @@ angular.module("artemis-content",[])
                                 + "?"
                                 + "&Scope=page_to_page"
                                 + "&Sort=domain_authority"
-                                // + "&Filter=equity"
-                                /**********
-                                *
-                                    nonequity
-                                        any of these attributes specified: nofollow, meta-nofollow, offscreen, 302 or an RSS feed
-                                    equity
-                                        not classified as non-equity, including followed links and 301 (permanent) redirects.
-                                *
-                                ***********/
                                 + "&LinkCols=2" // Flags full of data on each link
                                 + "&TargetCols=32" // No. of links
-                                + "&SourceCols=" + (4 + 34359738368 + 68719476736) // Canon URL + PDA + DA of source
+                                + "&SourceCols=" + (4 + 68719476736) // Canon URL + PDA + DA of source
                                 + "&Limit=50"
                         },
                         error: function(msg) {
@@ -192,7 +183,6 @@ angular.module("artemis-content",[])
                                 title: link.ut,
                                 url: link.uu,
                                 equitable: !Utils.lfBitFlag(link.lf),
-                                pageAuthority: link.upa,
                                 domainAuthority: link.pda,
                                 known: false,
                                 relevant: true
