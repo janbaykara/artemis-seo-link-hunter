@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links' ng-class='{dupe: !link.included}'>
+                <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links' ng-class='{dupe: !link.included, nofollow: !link.equitable, irrelevant: !link.relevant}'>
                     <td class='link-graph__relevance'>
                         <input ng-model='link.known' type='checkbox' disabled />
                     </td>
@@ -57,7 +57,7 @@
                     </td>
                     <td class='link-graph__url'>
                         <div class='tr'>
-                            <a href='{{link.url}}' target='_blank' class='label link-graph__authority' style='color: {{link.domain|strToHSL}}; background: {{link.domain|strToHSL}}'>{{link.domain}}</a>
+                            <a href='{{link.url}}' target='_blank' class='label link-graph__authority'>{{link.domain}}</a>
                             <a class='link-graph__source' href='{{link.url}}' target='_blank'>{{link.parseUri().relative}}</a>
                         </div>
                     </td>

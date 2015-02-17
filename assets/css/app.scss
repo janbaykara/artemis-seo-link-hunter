@@ -4,10 +4,10 @@
 
     &__row {
       &.dupe {
-        opacity: 0.2;
+        opacity: 0.5;
 
         td > * {
-          max-height: 21px;
+          max-height: 19px;
           overflow: hidden;
         }
       }
@@ -30,8 +30,15 @@
     }
 
     &__authority {
-      color: white !important;
+      background: #3391CE;
       font-size: 80%;
+
+      .irrelevant &,
+      .nofollow &
+      { background: #888; }
+
+      .dupe &
+      { background: none; color: #fff; }
     }
 
     &__da-bar div {
@@ -41,4 +48,14 @@
       font-weight: bold;
       font-size: 80%;
     }
+}
+
+.dupe .link-graph__da-bar > div {
+  display: none;
+}
+
+.nofollow .link-graph__da-bar * {
+  opacity: 0.5;
+  color: grey !important;
+  border-color: grey !important;
 }
