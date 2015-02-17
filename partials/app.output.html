@@ -1,10 +1,196 @@
 <div class='row' id='phase-2'>
     <div class='col-md-12'>
-        <a ui-sref='app.input'>&larr; Analyse a new Content Piece</a>
+        <a ui-sref='app.input'>&larr; Analyse new content</a>
         <h2>Analysis</h2>
     </div>
-    <div class='col-md-12' id='results'>
-        <tabs data="outputTabs" type="tabs" />
-        <div class='well' ui-view></div>
-    </div>
+    <article class='col-md-12' id='results'>
+    <!-- /////////////////////
+         //// SUMMARY
+         ///////////////// -->
+        <header class='data-intro'>
+            <iframe class='data-intro__background' ng-src='{{ContentPiece.safeURL}}' seamless="seamless" scrolling="no"></iframe>
+            <div class='data-intro__text'>
+                <h2 class='data-intro__subtitle' >Content marketing stats for</h2>
+                <h1 class='data-intro__name' >{{ContentPiece.data.name}}</h1>
+                <a  class='data-intro__link' href='{{ContentPiece.safeURL}}'>{{ContentPiece.safeURL}}</a>
+            </div>
+        </header>
+        <section class='data-section results__section--summary'>
+            <div class='row'>
+                <header class='col-sm-6'>
+                    <h2 class='data-section__title'>Key stats</h2>
+                </header>
+            </div>
+
+            <div class='row'>
+
+                <!-- Spread stats -->
+                <div class='col-sm-6'>
+                    <div class='dv col-md-12'>
+                        <div class='dv__val'>{{ContentPiece.data.equitableLinkCount}}</div>
+                        <div class='dv__label'>Equitable links</div class='dv__label'>
+                    </div>
+                    <div class='dv col-md-12'>
+                        <div class='dv__val'>{{ContentPiece.stats.socialCount()}}</div>
+                        <div class='dv__label'>Total shares</div class='dv__label'>
+                    </div>
+                </div>
+
+                <!-- Cost breakdown -->
+                <div class='col-sm-6'>
+                    <div class='dv'>
+                        <div class='dv__val' ng-bind-html='ContentPiece.stats.cost()|currency:"£"|sup'></div>
+                        <div class='dv__label'>Cost</div class='dv__label'>
+                    </div>
+                    <div class='dv'>
+                        <div class='dv__val' ng-bind-html='ContentPiece.stats.value()|currency:"£"|sup'></div>
+                        <div class='dv__label'>Calculated value</div class='dv__label'>
+                    </div>
+                    <div class='dv'>
+                        <div class='dv__val' style='color: hsl(
+                            {{ContentPiece.stats.profitloss()|normalise:-1000:1000:0:135}},
+                            100%,
+                            40%
+                        )' ng-bind-html='ContentPiece.stats.profitloss()|currency:"£"|sup'></div>
+                        <div class='dv__label'>Profit/loss</div class='dv__label'>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    <!-- /////////////////////
+         //// SOCIAL STATS
+         ///////////////// -->
+        <section class='data-section results__section--social'>
+            <div class='row'>
+                <header class='col-sm-6'>
+                    <h2 class='data-section__title'>Social stats</h2>
+                </header>
+            </div>
+
+            <div class='row'>
+                <div class='col-md-3'>
+                    <h1>{{ContentPiece.stats.socialCount()}}</h1>
+                    <span>Primary shares</span>
+                </div>
+                <div class='col-md-3'>
+                    <h1>{{ContentPiece.stats.socialCount(ContentPiece.stats.secondarySocialCombined)}}</h1>
+                    <span>Secondary shares</span>
+                </div>
+                <div class='col-md-3'>
+                    <h1>{{ContentPiece.stats.socialValue()|currency:"£"}}</h1>
+                    <span>Value of primary shares</span>
+                </div>
+                <div class='col-md-3'>
+                    <h1>{{ContentPiece.stats.socialValue("*",ContentPiece.stats.secondarySocialCombined)|currency:"£"}}</h1>
+                    <span>(Experimental) value of secondary shares</span>
+                </div>
+            </div>
+
+
+            <div class='row'>
+                <h3 class='col-md-12'>Sharing breakdown</h3>
+                <div class='col-md-3' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance <= 1'>
+                    <h1><span class='{{medium.icon}}'></span> {{medium.count}}</h1>
+                    <h2>{{ContentPiece.stats.socialValue(mediumID)|currency:"£"}}</h2>
+                    <span>{{medium.name}}</span>
+                </div>
+            </div>
+
+            <div class='row'>
+                <h4 class='col-md-12'>Other social media</h4>
+                <div class='col-md-2' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance > 1'>
+                    <span class='{{medium.icon}}'></span><br>
+                    <strong>{{medium.name}}</strong><br>
+                    # {{medium.count}}<br>
+                    {{ContentPiece.stats.socialValue(mediumID)|currency:"£"}}
+                </div>
+            </div>
+
+        </section>
+    <!-- /////////////////////
+         //// LINK STATS
+         ///////////////// -->
+        <section class='data-section results__section--links'>
+            <div class='row'>
+                <header class='col-sm-6'>
+                    <h2 class='data-section__title'>Link stats</h2>
+                    <p>By factoring out no-follow links and discounting less relevant links, and taking in to account the link’s Domain Authority, we can estimate the value of links back to the content.</p>
+                </header>
+            </div>
+
+            <!-- Link list -->
+            <label class='input-group' for='hideDupes'>
+                <input type='checkbox' ng-model='hideDuplicates' id='hideDupes' />
+                Hide duplicates
+            </label>
+            <table class='link-graph' ng-class='{hideDupes: hideDuplicates}'>
+                <thead>
+                    <tr>
+                        <th class='angled'>Equitable</th>
+                        <th class='angled'>Relevant</th>
+                        <th class='angled'>Unique</th>
+                        <th>Link URL</th>
+                        <th>Domain Authority</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links' ng-class='{
+                        dupe: !link.domainRepresentative,
+                        nofollow: !link.equitable,
+                        irrelevant: !link.relevant
+                    }'>
+                        <td class='link-graph__relevance'>
+                            <input ng-model='link.equitable' type='checkbox' disabled />
+                        </td>
+                        <td class='link-graph__relevance'>
+                            <input ng-model='link.relevant' type='checkbox' />
+                        </td>
+                        <td class='link-graph__relevance'>
+                            <input ng-model='link.domainRepresentative' type='checkbox' />
+                        </td>
+                        <td class='link-graph__url'>
+                            <div class='tr'>
+                                <a href='{{link.url}}' target='_blank' class='link-graph__authority'>{{link.domain}}</a>
+                                <a class='link-graph__source' href='{{link.url}}' target='_blank'>{{link.parseUri().relative}}</a>
+                            </div>
+                        </td>
+                        <td class='link-graph__da-bar'>
+                            <div style='width:{{link.domainAuthority}}%;
+                                border-color: hsl({{link.domainAuthority|normalise:0:100:45:0}},100%,50%);
+                                color: hsl({{link.domainAuthority|normalise:0:100:45:0}},80%,40%)'>
+                                DA: {{link.domainAuthority|number:1}}
+                            </div>
+                        </td>
+                        <td class='link-graph__value'>
+                            <div ng-show='link.equitable && link.domainRepresentative'>{{link.value()|currency:"£"}}</div>
+                            <div ng-show='!link.equitable' class='disqualifier'>No-follow</div>
+                            <div ng-show='!link.domainRepresentative' class='disqualifier'>Duplicate</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class='row'>
+                <div class='dv col-md-3'>
+                    <div class='dv__val'>{{ContentPiece.stats.equitableLinkCount()}}</div>
+                    <div class='dv__label'>Useful links</div class='dv__label'>
+                </div>
+                <div class='dv col-md-3'>
+                    <div class='dv__val'>{{ContentPiece.stats.averageDA()|number:1}}</div>
+                    <div class='dv__label'>Avg. DA</div class='dv__label'>
+                </div>
+                <div class='dv col-md-3'>
+                    <div class='dv__val' ng-bind-html='ContentPiece.stats.value() / ContentPiece.stats.equitableLinkCount() |currency:"£"|sup'></div>
+                    <div class='dv__label'>Avg. link value</div class='dv__label'>
+                </div>
+                <div class='dv col-md-3 pull-right'>
+                    <div class='dv__val' ng-bind-html='ContentPiece.stats.linkValue()|currency:"£"|sup'></div>
+                    <div class='dv__label'>Equitable link value</div class='dv__label'>
+                </div>
+            </div>
+
+        </section>
+    </article>
 </div>

@@ -8,7 +8,7 @@ var sharedCount = {
     "url": "//free.sharedcount.com"
 }
 
-angular.module('artemis', ['ui.router', 'ui.bootstrap', 'ui.router.tabs', 'utils.dataVis','artemis-content'])
+angular.module('artemis', ['ui.router','utils.dataVis','artemis-content'])
     .config(function($stateProvider,$locationProvider,$urlRouterProvider,$httpProvider) {
 
         $stateProvider
@@ -33,28 +33,12 @@ angular.module('artemis', ['ui.router', 'ui.bootstrap', 'ui.router.tabs', 'utils
             })
             .state('app.output', {
                 url: "/output",
-                abstract: true,
                 views: {
                     "main": {
                         templateUrl: "partials/app.output.html",
                         controller: 'output'
                     }
                 }
-            })
-            .state('app.output.summary', {
-                url: "/summary",
-                templateUrl: "partials/app.output.summary.html",
-                controller: 'summary'
-            })
-            .state('app.output.links', {
-                url: "/links",
-                templateUrl: "partials/app.output.links.html",
-                controller: 'links'
-            })
-            .state('app.output.social', {
-                url: "/social",
-                templateUrl: "partials/app.output.social.html",
-                controller: 'social'
             })
 
             $urlRouterProvider.otherwise("/");

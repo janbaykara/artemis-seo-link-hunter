@@ -27,7 +27,7 @@ angular.module("artemis-content",[])
             this.domainAuthority = 0;
             this.known = false;
             this.relevant = true;
-            this.included = true;
+            this.domainRepresentative = true;
             this.equitable = false;
             this.baseValue = 150;
             this.irrelevantLinkModifier = -50;
@@ -50,7 +50,7 @@ angular.module("artemis-content",[])
                 var link = this
                   , domainValue = link.baseValue * ( link.domainAuthority / 100 + 1 );
 
-                if(link.equitable && this.included) {
+                if(link.equitable && this.domainRepresentative) {
                     var value = link.relevant
                             ? domainValue + link.relevantLinkModifier
                             : domainValue + link.irrelevantLinkModifier
@@ -190,13 +190,13 @@ angular.module("artemis-content",[])
                         if (ContentPiece.data.knownLinks.length > 0) {
                             mergeInKnownLinks(callback);
                         } else {
-                            // each link.included = false if previous one is true
+                            // each link.domainRepresentative = false if previous one is true
                             _.each(ContentPiece.data.links, function(link) {
-                                if(link.included) {
+                                if(link.domainRepresentative) {
                                     _.each(ContentPiece.data.links, function(otherLink) {
                                         if( link.domain == otherLink.domain
                                          && link.url != otherLink.url )
-                                            otherLink.included = false;
+                                            otherLink.domainRepresentative = false;
                                     });
                                 }
                             })
@@ -305,7 +305,7 @@ angular.module("artemis-content",[])
 
                 equitableLinkCount: function() {
                     return _.filter(ContentPiece.data.links, function(link) {
-                        return link.included;
+                        return (link.domainRepresentative && link.equitable);
                     }).length;
                 }
             }

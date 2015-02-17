@@ -23,32 +23,15 @@ angular.module("artemis")
             ContentPiece.get.links(function(links) {
                 ContentPiece.get.social(function(shares) {
                     ContentPiece.get.secondDegreeSocial(function(secondaryShares) {
-                        $state.go('app.output.summary');
+                        $state.go('app.output');
                     })
                 });
             });
         }
     })
-    .controller('output', function($scope,$state,ContentPiece) {
-        $scope.outputTabs = [{
-            heading: 'Summary',
-            route:   'app.output.summary'
-        },{
-            heading: 'Links',
-            route:   'app.output.links'
-        },{
-            heading: 'Social',
-            route:   'app.output.social'
-        }];
-
+    .controller('output', function($scope,$state,ContentPiece,$sce) {
+        if(!ContentPiece.initialised()) $state.go('app.input');
         $scope.ContentPiece = ContentPiece;
-    })
-    .controller('summary', function($scope) {
-        // Summary data analysis
-    })
-    .controller('links', function($scope) {
-        // Link analysis
-    })
-    .controller('social', function($scope) {
-        // Social shares
+        $scope.hideDuplicates = true;
+        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
     })

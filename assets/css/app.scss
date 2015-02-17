@@ -1,53 +1,97 @@
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,500,700,900,300|Roboto+Condensed:300italic,400italic,700italic,400,700,300);
+
+body {
+  font: 400 15px/1.5em "Roboto", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,h2,h3,h4,h5 {
+  font-weight: 500;
+  font-family: "Roboto";
+}
+
 .link-graph {
+  width: 100%;
+  margin-top: 3em;
+  margin-bottom: 1em;
 
-    width: 100%;
+  th {
+    color: rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+  }
+  th.angled {
+    transform: rotate(-40deg);
+    transform-origin: 0% 0%;
+    max-width: 35px !important;
+  }
+  td {
+    text-align: left !important;
+  }
 
-    &__row {
-      &.dupe {
-        opacity: 0.5;
+  &__row {
+    line-height: 1em;
 
-        td > * {
-          max-height: 19px;
-          overflow: hidden;
-        }
+    &.dupe {
+      opacity: 0.5;
+
+      td > * {
+        max-height: 19px;
+        overflow: hidden;
       }
     }
+  }
 
-    &__relevance {
-      text-align: center;
-    }
+  &__relevance {
+    text-align: center;
+  }
 
-    &__da-bar {
-      width: 50%;
-    }
+  &__da-bar {
+    width: 50%;
+  }
 
-    &__url * {
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      font-size: 90%;
-      line-height: 1.5em;
-    }
+  &__url * {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-size: 90%;
+    line-height: 1.5em;
+    color: rgba(255, 255, 255, 0.66);
+  }
 
-    &__authority {
-      background: #3391CE;
-      font-size: 80%;
+  &__authority {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #FFF;
 
-      .irrelevant &,
-      .nofollow &
-      { background: #888; }
+    .dupe & { opacity: 0; }
+  }
 
-      .dupe &
-      { background: none; color: #fff; }
-    }
+  &__da-bar div {
+    padding: 5px 0;
+    border-top: 2px solid #000;
+    text-align: right;
+    font-weight: bold;
+    font-size: 80%;
+  }
 
-    &__da-bar div {
-      padding: 5px 0;
-      border-top: 2px solid red;
-      text-align: right;
-      font-weight: bold;
-      font-size: 80%;
-    }
+  &__value {
+    font-weight: bold;
+  }
+}
+
+.disqualifier {
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.05em;
+  line-height: 1em;
+  white-space: nowrap;
+}
+th:last-child,
+td:last-child {
+  padding-left: 10px;
 }
 
 .dupe .link-graph__da-bar > div {
@@ -58,4 +102,110 @@
   opacity: 0.5;
   color: grey !important;
   border-color: grey !important;
+}
+
+.hideDupes .link-graph__row.dupe {
+  display: none;
+}
+
+.results {
+  &__section {
+    &--summary {
+      background: #56B3B0;
+      color: white;
+    }
+    &--social {
+      background: #FECF8C;
+      color: #404f4e;
+    }
+    &--links {
+      background: #7fc3f2;
+      color: white;
+    }
+  }
+}
+
+.data-intro {
+  position: relative;
+
+  &:before {
+    content: "";
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%);
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    display: block;
+  }
+  &__background {
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    border: none;
+  }
+  &__text {
+    position: absolute;
+    bottom: 0;
+    padding: 90px 120px;
+    color: white;
+  }
+  &__text * {
+    color: inherit;
+  }
+  &__subtitle {
+    font-weight: 300;
+    margin: 0;
+  }
+  &__name {
+    font-weight: 900;
+    font-size: 50px;
+    margin: 0;
+  }
+  &__link {
+    display: block;
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: 100;
+
+    &:hover { color: inherit; }
+  }
+}
+
+.data-section {
+  padding: 100px;
+  &__title {
+    font-weight: 300;
+    font-size: 50px;
+    margin-top: -20px;
+  }
+}
+
+.dv {
+  font-size: 50px;
+  line-height: 1em;
+
+  &.pull-right { text-align: right; }
+
+  &.h {
+    display: inline-block;
+    width: auto !important;
+    padding: 0 15px;
+    position: relative;
+  }
+
+  &__val {
+    font-weight: 700;
+    sup {
+      font-size: 58%;
+      vertical-align: baseline;
+      opacity: 0.7
+    }
+  }
+  &__label {
+    font-size: 12px;
+    font-weight:  bold;
+    line-height: 1em;
+    margin: 0em 0 1em;
+  }
 }
