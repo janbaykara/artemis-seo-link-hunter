@@ -29,7 +29,6 @@ function errorHandler(error) {
 gulp.task('misc', function() {
   gulp.src(dirs.dev.misc)
   .pipe(gulp.dest(dirs.prod.misc))
-  .on('error', function(error) { errorHandler(error) })
 });
 
 // // ----------------------------------------------------------------
@@ -44,7 +43,7 @@ gulp.task('misc', function() {
     .pipe(plugins.rename({suffix: '.min'}))
     .pipe(plugins.size({showFiles: true}))
     .pipe(gulp.dest(dirs.prod.styles))
-    .on('error', function(error) { errorHandler(error) })
+
   });
 
 // // ----------------------------------------------------------------
@@ -59,7 +58,6 @@ gulp.task('misc', function() {
     .pipe(plugins.rename({suffix: '.min.js'}))
     .pipe(plugins.size({showFiles: true}))
     .pipe(gulp.dest(dirs.prod.scripts))
-    .on('error', function(error) { errorHandler(error) })
   });
 
   // Project JS
@@ -73,7 +71,6 @@ gulp.task('misc', function() {
     .pipe(plugins.sourcemaps.write('.'))
     .pipe(plugins.size({showFiles: true}))
     .pipe(gulp.dest(dirs.prod.scripts))
-    .on('error', function(error) { errorHandler(error) })
   });
 
 // ----------------------------------------------------------------
