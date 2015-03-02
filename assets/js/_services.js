@@ -38,7 +38,6 @@ angular.module("artemis-content",[])
                 this[prop] = arguments[0][prop];
             }
 
-            console.log(this.url);
             if(this.url.indexOf("http") == -1) // Add HTTP to all
                 this.url = "http://"+this.url;
             if(this.url.indexOf("www.") > -1) // Remove all www's
@@ -152,6 +151,8 @@ angular.module("artemis-content",[])
                 },
 
                 links: function(callback) {
+
+                    // Get info on this link.
                     $.ajax({
                         url: "mozapi.php",
                         type: "POST",
@@ -171,19 +172,19 @@ angular.module("artemis-content",[])
                         success: function(res) {
                             var links = JSON.parse(res)
                               , havePageData = true;
-
-                            if(links.length == 0) {
-                                console.log("SEOMoz doesn't have a record on this URL, yet.")
-                                havePageData = false
-                            }
+                            if(links.length == 0) havePageData = false
                             onReceiveLinks(havePageData,links);
                         }
                     });
 
+                    // Once page data is received, trawl through the links
                     function onReceiveLinks(havePageData,links) {
                         ContentPiece.data.equitableLinkCount = (links.length > 0) ? links[0].luueid : 0;
 
+                        // If MOZ data exists for this page
+                        // then analyse each of the links automatically found
                         if(havePageData) {
+                            console.log("Fetched %i new links",links.length)
                             _.each(links, function(link) {
                                 var linkObject = new ContentLink({
                                     title: link.ut,
@@ -195,22 +196,28 @@ angular.module("artemis-content",[])
                                 })
                                 ContentPiece.data.links.push(linkObject)
                             })
+                        } else {
+                            console.log("Could not fetch any new links")
                         }
 
-                        if (ContentPiece.data.knownLinks.length > 0) {
-                            console.log("Getting data on previously known links.")
+                        if(ContentPiece.data.knownLinks.length > 0) {
+                            console.log("Getting data on %i previously known links.",ContentPiece.data.knownLinks.length)
                             mergeInKnownLinks(havePageData);
+                        } else {
+                            console.log("Was not provided with any known links");
                         }
 
+                        // Ensure there are no multiple checked URLs per domain
                         _.each(ContentPiece.data.links, function(link) {
                             if(link.domainRepresentative) {
                                 _.each(ContentPiece.data.links, function(otherLink) {
-                                    if( link.domain == otherLink.domain
-                                     && link.url != otherLink.url )
+                                    if( link.domain == otherLink.domain && link.url != otherLink.url )
                                         otherLink.domainRepresentative = false;
                                 });
                             }
                         })
+
+                        // Dun.
                         if (typeof callback == 'function') callback(ContentPiece.data.links);
                     }
 
@@ -243,12 +250,16 @@ angular.module("artemis-content",[])
 
                                 // Turn into propa links
                                 _.each(links, function(link) {
-                                    console.log(link);
+                                    var url = _.find(ContentPiece.data.knownLinks, function(potentialURL) {
+                                                    return (
+                                                        link.uu.indexOf(Utils.parseUri(potentialURL).authority) > -1
+                                                     || Utils.parseUri(potentialURL).authority.indexOf(link.uu) > -1
+                                                    );
+                                                });
+                                    console.log(link.uu,url);
                                     var linkObject = new ContentLink({
                                         title: link.ut,
-                                        url: _.find(ContentPiece.data.knownLinks, function(potentialURL) {
-                                            return ( link.uu == Utils.parseUri(potentialURL).authority );
-                                        }),
+                                        url: url,
                                         equitable: !Utils.lfBitFlag(link.lf),
                                         domainAuthority: link.pda,
                                         known: true,

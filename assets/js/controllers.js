@@ -6,9 +6,9 @@ angular.module("artemis")
 
         // Default values
         $scope.newPiece = {
-            name: "Sample Content Piece",
+            name: "The Periodic Table of Chillis",
             url: "http://www.ukoakdoors.co.uk/articles/6220/what-to-eat-in-the-wilderness-a-survival-guide/",
-            billableHours: 30
+            billableHours: 20
         };
 
         // ng-click()
@@ -20,13 +20,12 @@ angular.module("artemis")
                 knownLinks: (typeof $scope.newPiece.knownLinks != 'undefined' && $scope.newPiece.knownLinks.length > 3) ? $scope.newPiece.knownLinks.split("\n") : []
             });
 
-            console.log("Loading links for content");
+            console.log("Loading content links");
             ContentPiece.get.links(function(links) {
-                console.log("Loaded "+links.length+" links")
+                console.log("Loading social shares");
                 ContentPiece.get.social(function(shares) {
-                    console.log("Loaded "+shares.length+" shares")
+                    console.log("Loading second degree shares");
                     ContentPiece.get.secondDegreeSocial(function(secondaryShares) {
-                        console.log("Loaded "+secondaryShares.length+" secondary shares")
                         console.log("Finished data capture.")
                         $state.go('app.output');
                     })
