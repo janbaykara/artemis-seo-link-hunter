@@ -2,7 +2,7 @@
 <html lang='en-gb' ng-app='artemis'>
 <head>
     <meta charset="utf-8">
-    <base href="/boom/artemis/">
+    <base href="/playground/boom/artemis/">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ARTEMIS Link Hunter</title>

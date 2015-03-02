@@ -1,3 +1,7 @@
+function authParams(x) {
+    console.log(x);
+}
+
 angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
@@ -56,6 +60,12 @@ angular.module("artemis")
             secret: 'VgZzmN7AYLRw36An0pFFh_Z-0kCXhnT67pUqX3-f-83c6Jp-PuuoMe9FiS_SdA6v'
         }
 
+        function popupWindow(url, title, w, h) {
+          var left = (screen.width/2)-(w/2);
+          var top = (screen.height/2)-(h/2);
+          return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, width='+w+', height='+h+', top='+top+', left='+left);
+        }
+
         $scope.googleAnalytics = function() {
             // OAuth for what
             // Replace with window.open -> get oauth token back to here, then proceed with gapi.class.php query
@@ -67,35 +77,49 @@ angular.module("artemis")
             // }).success(function(a,b,c) {
             //     console.log(a,b,c);
             // })
+            var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
+                            + "&scope=https://www.googleapis.com/auth/analytics.readonly"
+                            + "&response_type=token"
+                            + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
+                            + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
+            var w = popupWindow(oauthURL,"_blank",600,600);
+            // get access_token obj back from `w`
+            // w.close();
 
             /*
-            $ga->requestReportData(
-                ga_profile_id,
-                array('source','referralPath'),//what field you are looking for
-                array('pageviews','visits'),//what metric you want to calculate
-                '-visits',//sort order, prefix - means descending
-                'ga:pagePath==/wemissyou && medium==referral && referralPath != /',//filter query
-                null,//start: yyyy-mm-dd or null
-                null,//end: yyyy-mm-dd or null
-                1,//offset lookup
-                100//max result
-            );
+            function onAuth(access_token) {
+
+                // Convert this to a URL
+                // $ga->requestReportData(
+                //     ga_profile_id,
+                //     array('source','referralPath'),//what field you are looking for
+                //     array('pageviews','visits'),//what metric you want to calculate
+                //     '-visits',//sort order, prefix - means descending
+                //     'ga:pagePath==/wemissyou && medium==referral && referralPath != /',//filter query
+                //     null,//start: yyyy-mm-dd or null
+                //     null,//end: yyyy-mm-dd or null
+                //     1,//offset lookup
+                //     100//max result
+                // );
+
+                $http.get("https://www.googleapis.com/analytics/v3/data", {
+                    "access_token": access_token,
+                    "ids": "ga:12345",
+                    "dimensions": "ga:source,ga:medium",
+                    "metrics": "ga:sessions,ga:bounces",
+                    "sort": "-ga:sessions",
+                    "filters": "ga:medium%3D%3Dreferral",
+                    "segment": "gaid::-10 OR segment: sessions::condition::ga:medium%3D%3Dreferral",
+                    "start-date": "2008-10-01",
+                    "end-date": "2008-10-31",
+                    "start-index": 10,
+                    "max-results": 100,
+                    "prettyprint": true
+                }).success(function(a,b,c) {
+                    console.log(a,b,c);
+                })
+            }
             */
-            $http.get("https://www.googleapis.com/analytics/v2.4/data", {
-                "ids": "ga:12345",
-                "dimensions": "ga:source,ga:medium",
-                "metrics": "ga:sessions,ga:bounces",
-                "sort": "-ga:sessions",
-                "filters": "ga:medium%3D%3Dreferral",
-                "segment": "gaid::-10 OR segment: sessions::condition::ga:medium%3D%3Dreferral",
-                "start-date": "2008-10-01",
-                "end-date": "2008-10-31",
-                "start-index": 10,
-                "max-results": 100,
-                "prettyprint": true
-            }).success(function(a,b,c) {
-                console.log(a,b,c);
-            })
         }
 
         $scope.fetchBuzzstream = function() {
