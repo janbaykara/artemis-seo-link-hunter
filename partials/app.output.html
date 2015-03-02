@@ -4,9 +4,13 @@
         <h2>Analysis</h2>
     </div>
     <article class='col-md-12' id='results'>
+
+
     <!-- /////////////////////
          //// SUMMARY
          ///////////////// -->
+
+
         <header class='data-intro'>
             <iframe class='data-intro__background' ng-src='{{ContentPiece.safeURL}}' seamless="seamless" scrolling="no"></iframe>
             <div class='data-intro__text'>
@@ -18,19 +22,18 @@
         <section class='data-section results__section--summary'>
             <div class='row'>
                 <header class='col-sm-6'>
-                    <h2 class='data-section__title'>Key stats</h2>
+                    <h2 class='data-section__title'>Social stats</h2>
                 </header>
             </div>
 
             <div class='row'>
-
                 <!-- Spread stats -->
                 <div class='col-sm-6'>
-                    <div class='dv col-md-12'>
+                    <div class='dv'>
                         <div class='dv__val'>{{ContentPiece.data.equitableLinkCount}}</div>
                         <div class='dv__label'>Equitable links</div class='dv__label'>
                     </div>
-                    <div class='dv col-md-12'>
+                    <div class='dv'>
                         <div class='dv__val'>{{ContentPiece.stats.socialCount()}}</div>
                         <div class='dv__label'>Total shares</div class='dv__label'>
                     </div>
@@ -58,9 +61,13 @@
 
             </div>
         </section>
+
+
     <!-- /////////////////////
          //// SOCIAL STATS
          ///////////////// -->
+
+
         <section class='data-section results__section--social'>
             <div class='row'>
                 <header class='col-sm-6'>
@@ -69,48 +76,51 @@
             </div>
 
             <div class='row'>
-                <div class='col-md-3'>
-                    <h1>{{ContentPiece.stats.socialCount()}}</h1>
-                    <span>Primary shares</span>
+                <div class='col-md-3 dv'>
+                    <div class='dv__val'>{{ContentPiece.stats.socialCount()}}</div>
+                    <div class='dv__label'>Primary shares</div>
                 </div>
-                <div class='col-md-3'>
-                    <h1>{{ContentPiece.stats.socialCount(ContentPiece.stats.secondarySocialCombined)}}</h1>
-                    <span>Secondary shares</span>
+                <div class='col-md-3 dv'>
+                    <div class='dv__val'>{{ContentPiece.stats.socialCount(ContentPiece.stats.secondarySocialCombined)}}</div>
+                    <div class='dv__label'>Secondary shares</div>
                 </div>
-                <div class='col-md-3'>
-                    <h1>{{ContentPiece.stats.socialValue()|currency:"£"}}</h1>
-                    <span>Value of primary shares</span>
+                <div class='col-md-3 dv'>
+                    <div class='dv__val' ng-bind-html='ContentPiece.stats.socialValue()|currency:"£"|sup'></div>
+                    <div class='dv__label'>Value of primary shares</div>
                 </div>
-                <div class='col-md-3'>
-                    <h1>{{ContentPiece.stats.socialValue("*",ContentPiece.stats.secondarySocialCombined)|currency:"£"}}</h1>
-                    <span>(Experimental) value of secondary shares</span>
-                </div>
-            </div>
-
-
-            <div class='row'>
-                <h3 class='col-md-12'>Sharing breakdown</h3>
-                <div class='col-md-3' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance <= 1'>
-                    <h1><span class='{{medium.icon}}'></span> {{medium.count}}</h1>
-                    <h2>{{ContentPiece.stats.socialValue(mediumID)|currency:"£"}}</h2>
-                    <span>{{medium.name}}</span>
+                <div class='col-md-3 dv'>
+                    <div class='dv__val' ng-bind-html='ContentPiece.stats.socialValue("*",ContentPiece.stats.secondarySocialCombined)|currency:"£"|sup'></div>
+                    <div class='dv__label'>(Experimental) value of secondary shares</div>
                 </div>
             </div>
 
             <div class='row'>
-                <h4 class='col-md-12'>Other social media</h4>
+                <h3 class='col-md-12'>Primary sharing breakdown</h3>
+                <div class='col-md-3 dv' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance <= 1'>
+                    <div class='dv__val'><span class='{{medium.icon}}'></span>{{medium.count}}</div>
+                    <div class='dv__val' ng-bind-html='ContentPiece.stats.socialValue(mediumID)|currency:"£"|sup'></div>
+                    <div class='dv__label'>{{medium.name}}</div>
+                </div>
+            </div>
+
+            <div class='row'>
+                <h4 class='col-md-12'>Other primary social media</h4>
                 <div class='col-md-2' ng-repeat='(mediumID,medium) in ContentPiece.data.shares' ng-if='medium.importance > 1'>
-                    <span class='{{medium.icon}}'></span><br>
+                    <div class='{{medium.icon}}'></div><br>
                     <strong>{{medium.name}}</strong><br>
                     # {{medium.count}}<br>
-                    {{ContentPiece.stats.socialValue(mediumID)|currency:"£"}}
+                    <div ng-bind-html='ContentPiece.stats.socialValue(mediumID)|currency:"£"|sup'></div>
                 </div>
             </div>
 
         </section>
+
+
     <!-- /////////////////////
          //// LINK STATS
          ///////////////// -->
+
+
         <section class='data-section results__section--links'>
             <div class='row'>
                 <header class='col-sm-6'>
@@ -158,13 +168,13 @@
                         </td>
                         <td class='link-graph__da-bar'>
                             <div style='width:{{link.domainAuthority}}%;
-                                border-color: hsl({{link.domainAuthority|normalise:0:100:45:0}},100%,50%);
+                                border-color: hsla(0,0%,0%,{{link.domainAuthority|normalise:0:100:0:50:100}});
                                 color: hsl({{link.domainAuthority|normalise:0:100:45:0}},80%,40%)'>
-                                DA: {{link.domainAuthority|number:1}}
+                                {{link.domainAuthority|number:1}}
                             </div>
                         </td>
                         <td class='link-graph__value'>
-                            <div ng-show='link.equitable && link.domainRepresentative'>{{link.value()|currency:"£"}}</div>
+                            <div ng-show='link.equitable && link.domainRepresentative' ng-bind-html='link.value()|currency:"£"|sup'></div>
                             <div ng-show='!link.equitable' class='disqualifier'>No-follow</div>
                             <div ng-show='!link.domainRepresentative' class='disqualifier'>Duplicate</div>
                         </td>
@@ -174,20 +184,20 @@
 
             <div class='row'>
                 <div class='dv col-md-3'>
-                    <div class='dv__val'>{{ContentPiece.stats.equitableLinkCount()}}</div>
+                    <div class='dv__val'>{{ContentPiece.stats.usefulLinkCount()}}</div>
                     <div class='dv__label'>Useful links</div class='dv__label'>
                 </div>
                 <div class='dv col-md-3'>
                     <div class='dv__val'>{{ContentPiece.stats.averageDA()|number:1}}</div>
-                    <div class='dv__label'>Avg. DA</div class='dv__label'>
+                    <div class='dv__label'>Avg. DA (useful links)</div class='dv__label'>
                 </div>
                 <div class='dv col-md-3'>
-                    <div class='dv__val' ng-bind-html='ContentPiece.stats.value() / ContentPiece.stats.equitableLinkCount() |currency:"£"|sup'></div>
-                    <div class='dv__label'>Avg. link value</div class='dv__label'>
+                    <div class='dv__val' ng-bind-html='ContentPiece.stats.value() / ContentPiece.stats.usefulLinkCount() |currency:"£"|sup'></div>
+                    <div class='dv__label'>Avg. link value (useful links)</div class='dv__label'>
                 </div>
                 <div class='dv col-md-3 pull-right'>
                     <div class='dv__val' ng-bind-html='ContentPiece.stats.linkValue()|currency:"£"|sup'></div>
-                    <div class='dv__label'>Equitable link value</div class='dv__label'>
+                    <div class='dv__label'>Total value (useful links)</div class='dv__label'>
                 </div>
             </div>
 

@@ -28,7 +28,7 @@ angular.module("artemis-content",[])
             this.known = false;
             this.relevant = true;
             this.domainRepresentative = true;
-            this.equitable = false;
+            this.equitable = true;
             this.baseValue = 150;
             this.irrelevantLinkModifier = -50;
             this.relevantLinkModifier = 10;
@@ -151,6 +151,8 @@ angular.module("artemis-content",[])
                 },
 
                 links: function(callback) {
+
+                    // Get info on this link.
                     $.ajax({
                         url: "mozapi.php",
                         type: "POST",
@@ -168,43 +170,69 @@ angular.module("artemis-content",[])
                             console.warn(msg);
                         },
                         success: function(res) {
-                            onReceiveLinks(JSON.parse(res));
+                            var links = JSON.parse(res)
+                              , havePageData = true;
+                            if(links.length == 0) havePageData = false
+                            onReceiveLinks(havePageData,links);
                         }
                     });
 
-                    function onReceiveLinks(links) {
+                    // Once page data is received, trawl through the links
+                    function onReceiveLinks(havePageData,links) {
                         ContentPiece.data.equitableLinkCount = (links.length > 0) ? links[0].luueid : 0;
 
-                        _.each(links, function(link) {
-                            var linkObject = new ContentLink({
-                                title: link.ut,
-                                url: link.uu,
-                                equitable: !Utils.lfBitFlag(link.lf),
-                                domainAuthority: link.pda,
-                                known: false,
-                                relevant: true
+                        // If MOZ data exists for this page
+                        // then analyse each of the links automatically found
+                        if(havePageData) {
+                            console.log("Fetched %i new links",links.length)
+                            _.each(links, function(link) {
+                                var linkObject = new ContentLink({
+                                    title: link.ut,
+                                    url: link.uu,
+                                    equitable: !Utils.lfBitFlag(link.lf),
+                                    domainAuthority: link.pda,
+                                    known: false,
+                                    relevant: true
+                                })
+                                ContentPiece.data.links.push(linkObject)
                             })
-                            ContentPiece.data.links.push(linkObject)
+                        } else {
+                            console.log("Could not fetch any new links")
+                        }
+
+                        if(ContentPiece.data.knownLinks.length > 0) {
+                            console.log("Getting data on %i previously known links.",ContentPiece.data.knownLinks.length)
+                            mergeInKnownLinks(havePageData);
+                        } else {
+                            console.log("Was not provided with any known links");
+                        }
+
+                        // Ensure there are no multiple checked URLs per domain
+                        _.each(ContentPiece.data.links, function(link) {
+                            if(link.domainRepresentative) {
+                                _.each(ContentPiece.data.links, function(otherLink) {
+                                    if( link.domain == otherLink.domain && link.url != otherLink.url )
+                                        otherLink.domainRepresentative = false;
+                                });
+                            }
                         })
 
-                        if (ContentPiece.data.knownLinks.length > 0) {
-                            mergeInKnownLinks(callback);
-                        } else {
-                            // each link.domainRepresentative = false if previous one is true
-                            _.each(ContentPiece.data.links, function(link) {
-                                if(link.domainRepresentative) {
-                                    _.each(ContentPiece.data.links, function(otherLink) {
-                                        if( link.domain == otherLink.domain
-                                         && link.url != otherLink.url )
-                                            otherLink.domainRepresentative = false;
-                                    });
-                                }
-                            })
-                            if (typeof callback == 'function') callback(ContentPiece.data.links);
-                        }
+                        // Dun.
+                        if (typeof callback == 'function') callback(ContentPiece.data.links);
                     }
 
-                    function mergeInKnownLinks(cb) {
+                    function mergeInKnownLinks(havePageData) {
+
+                        var knownLinkDomains = havePageData ?
+                                                // Use pages as input
+                                                ContentPiece.data.knownLinks
+                                                // Or else get the root domains of the input pages
+                                                : _.map(ContentPiece.data.knownLinks, function(link) {
+                                                    return Utils.parseUri(link).authority;
+                                                });
+
+                        console.log(knownLinkDomains);
+
                         $.ajax({
                             url: "mozapi.php",
                             type: "POST",
@@ -213,30 +241,35 @@ angular.module("artemis-content",[])
                                    + "?"
                                    + "&Cols="
                                    + (4 + 68719476736), // Canon URL + DA of source,
-                                array: ContentPiece.data.knownLinks
+                                array:  knownLinkDomains
                             },
-                            error: function(msg) {
-                                console.warn(msg);
-                            },
+                            error: function(msg) { console.warn(msg); },
                             success: function(res) {
                                 var links = JSON.parse(res);
                                 var knownLinksData = [];
 
                                 // Turn into propa links
                                 _.each(links, function(link) {
+                                    var url = _.find(ContentPiece.data.knownLinks, function(potentialURL) {
+                                                    return (
+                                                        link.uu.indexOf(Utils.parseUri(potentialURL).authority) > -1
+                                                     || Utils.parseUri(potentialURL).authority.indexOf(link.uu) > -1
+                                                    );
+                                                });
+                                    console.log(link.uu,url);
                                     var linkObject = new ContentLink({
-                                        // title: link.ut,
-                                        url: link.uu,
-                                        // equitable: !lfBitFlag(link.lf),
-                                        // domainAuthority: link.pda,
+                                        title: link.ut,
+                                        url: url,
+                                        equitable: !Utils.lfBitFlag(link.lf),
+                                        domainAuthority: link.pda,
                                         known: true,
-                                        // relevant: true
+                                        relevant: true
                                     });
                                     knownLinksData.push(linkObject)
                                 });
 
                                 // Merge into found links dataset
-                                mergeByProperty(ContentPiece.data.links, knownLinksData, 'url');
+                                Utils.mergeByProperty(ContentPiece.data.links, knownLinksData, 'url');
 
                                 if (typeof callback == 'function') callback(ContentPiece.data.links);
                             }
@@ -247,7 +280,10 @@ angular.module("artemis-content",[])
 
 
             stats: {
+
+                //////////////////////
                 // Useful calculations
+
                 linkValue: function() {
                     var totalLinkValue = 0;
                     _.each(ContentPiece.data.links, function(link) {
@@ -282,12 +318,19 @@ angular.module("artemis-content",[])
                     return ContentPiece.stats.value() - ContentPiece.stats.cost()
                 },
 
+
+                ////////////////////////////
                 // Informative summary calcs
 
                 averageDA: function() {
-                    return _.reduce(ContentPiece.data.links, function(stored, margin) {
-                        return stored + margin.domainAuthority;
-                    }, 0) / ContentPiece.data.links.length;
+                    var nUsefulLinks = 0
+                      , aggregateDA = _.reduce(ContentPiece.data.links, function(stored, margin) {
+                                            if(margin.equitable && margin.domainRepresentative) {
+                                                nUsefulLinks++;
+                                                return stored + margin.domainAuthority;
+                                            } else return stored;
+                                        }, 0);
+                    return aggregateDA / nUsefulLinks;
                 },
 
                 socialCount: function(x) {
@@ -303,7 +346,7 @@ angular.module("artemis-content",[])
                     });
                 },
 
-                equitableLinkCount: function() {
+                usefulLinkCount: function() {
                     return _.filter(ContentPiece.data.links, function(link) {
                         return (link.domainRepresentative && link.equitable);
                     }).length;

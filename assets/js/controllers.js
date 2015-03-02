@@ -6,9 +6,9 @@ angular.module("artemis")
 
         // Default values
         $scope.newPiece = {
-            name: "Sample Content Piece (Chilli Table - Appliance City)",
-            url: "http://www.appliancecity.co.uk/chilli/",
-            billableHours: 30
+            name: "The Periodic Table of Chillis",
+            url: "http://www.ukoakdoors.co.uk/articles/6220/what-to-eat-in-the-wilderness-a-survival-guide/",
+            billableHours: 20
         };
 
         // ng-click()
@@ -20,9 +20,13 @@ angular.module("artemis")
                 knownLinks: (typeof $scope.newPiece.knownLinks != 'undefined' && $scope.newPiece.knownLinks.length > 3) ? $scope.newPiece.knownLinks.split("\n") : []
             });
 
+            console.log("Loading content links");
             ContentPiece.get.links(function(links) {
+                console.log("Loading social shares");
                 ContentPiece.get.social(function(shares) {
+                    console.log("Loading second degree shares");
                     ContentPiece.get.secondDegreeSocial(function(secondaryShares) {
+                        console.log("Finished data capture.")
                         $state.go('app.output');
                     })
                 });
@@ -34,4 +38,10 @@ angular.module("artemis")
         $scope.ContentPiece = ContentPiece;
         $scope.hideDuplicates = true;
         $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
+    })
+    .filter('sup', function($sce) {
+        return function(input) {
+            var num = input.split(".");
+            return $sce.trustAsHtml(num[0]+"<sup>."+num[1]+"</sup>");
+        }
     })
