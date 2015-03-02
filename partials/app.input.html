@@ -20,6 +20,7 @@
         <div class="form-group">
             <label for="input-content-url">Canonical URL</label>
             <input type="url" class="form-control" ng-model='newPiece.url' id="input-content-url" placeholder="Content URL" />
+            <button ng-click='googleAnalytics()' type='button' class='btn col-md-12'>Google Analytics</button>
         </div>
     </div>
     <div class='col-md-6'>
@@ -27,7 +28,7 @@
         <input type='text' class='form-control' ng-model='buzzstream.secret' placeholder='Buzzstream Consumer Secret' />
         <button ng-click='fetchBuzzstream()' type='button' class='btn col-md-12' ng-class='{"btn-success": buzzstream.done}'>
             {{buzzstream.done ? 'Finished fetching Buzzstream links' : buzzstream.doing ? 'Fetching Buzzstream links' : 'Fetch Buzzstream links'}}
-         </button>
+        </button>
     </div>
     <div class='col-md-12'>
         <div class="form-group">

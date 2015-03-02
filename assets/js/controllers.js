@@ -2,7 +2,7 @@ angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
     })
-    .controller('input', function($scope,$state,ContentPiece) {
+    .controller('input', function($scope,$state,ContentPiece,$http) {
 
         // Default values
         $scope.newPiece = {
@@ -54,6 +54,48 @@ angular.module("artemis")
             links: [],
             key: 'f41fb799-2865-4621-94a0-97091d515d21',
             secret: 'VgZzmN7AYLRw36An0pFFh_Z-0kCXhnT67pUqX3-f-83c6Jp-PuuoMe9FiS_SdA6v'
+        }
+
+        $scope.googleAnalytics = function() {
+            // OAuth for what
+            // Replace with window.open -> get oauth token back to here, then proceed with gapi.class.php query
+            // $http.get("https://accounts.google.com/o/oauth2/auth", {
+            //     "scope": "https://www.googleapis.com/auth/analytics.readonly",
+            //     "response_type": "token",
+            //     "client_id": "696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com",
+            //     "redirect_uri": "http://www.boom-online.co.uk/playground/boom/artemis/"
+            // }).success(function(a,b,c) {
+            //     console.log(a,b,c);
+            // })
+
+            /*
+            $ga->requestReportData(
+                ga_profile_id,
+                array('source','referralPath'),//what field you are looking for
+                array('pageviews','visits'),//what metric you want to calculate
+                '-visits',//sort order, prefix - means descending
+                'ga:pagePath==/wemissyou && medium==referral && referralPath != /',//filter query
+                null,//start: yyyy-mm-dd or null
+                null,//end: yyyy-mm-dd or null
+                1,//offset lookup
+                100//max result
+            );
+            */
+            $http.get("https://www.googleapis.com/analytics/v2.4/data", {
+                "ids": "ga:12345",
+                "dimensions": "ga:source,ga:medium",
+                "metrics": "ga:sessions,ga:bounces",
+                "sort": "-ga:sessions",
+                "filters": "ga:medium%3D%3Dreferral",
+                "segment": "gaid::-10 OR segment: sessions::condition::ga:medium%3D%3Dreferral",
+                "start-date": "2008-10-01",
+                "end-date": "2008-10-31",
+                "start-index": 10,
+                "max-results": 100,
+                "prettyprint": true
+            }).success(function(a,b,c) {
+                console.log(a,b,c);
+            })
         }
 
         $scope.fetchBuzzstream = function() {
