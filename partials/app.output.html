@@ -146,13 +146,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links' ng-class='{
+                    <tr class='link-graph__row' ng-repeat='link in ContentPiece.data.links | orderBy : "domainAuthority" : true' ng-class='{
                         dupe: !link.domainRepresentative,
                         nofollow: !link.equitable,
-                        irrelevant: !link.relevant
+                        irrelevant: !link.relevant,
+                        known: link.known,
+                        new: !link.known
                     }'>
                         <td class='link-graph__relevance'>
-                            <input ng-model='link.equitable' type='checkbox' disabled />
+                            <input ng-model='link.equitable' type='checkbox' />
                         </td>
                         <td class='link-graph__relevance'>
                             <input ng-model='link.relevant' type='checkbox' />

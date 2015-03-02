@@ -23,10 +23,24 @@
         </div>
     </div>
     <div class='col-md-6'>
+        <input type='text' class='form-control' ng-model='buzzstream.key' placeholder='Buzzstream Consumer Key' />
+        <input type='text' class='form-control' ng-model='buzzstream.secret' placeholder='Buzzstream Consumer Secret' />
+        <button ng-click='fetchBuzzstream()' type='button' class='btn col-md-12' ng-class='{"btn-success": buzzstream.done}'>
+            {{buzzstream.done ? 'Finished fetching Buzzstream links' : buzzstream.doing ? 'Fetching Buzzstream links' : 'Fetch Buzzstream links'}}
+         </button>
+    </div>
+    <div class='col-md-12'>
         <div class="form-group">
             <label for="input-content-links">Known external links</label>
-            <textarea class="form-control" rows="3" ng-model='newPiece.knownLinks' id="input-content-links" placeholder='List of known URLs, one per line'></textarea>
+            <textarea class="form-control" rows="10" ng-model='newPiece.inputLinks' id="input-content-links" placeholder='List of known URLs, one per line'></textarea>
         </div>
+    </div>
+</div>
+
+<div class='row'>
+    <div class='col-md-12'>
+        <h3>Algorithm variables</h3>
+        ...
     </div>
 </div>
 
