@@ -129,6 +129,9 @@ angular.module("artemis-content",[])
                 },
 
                 secondDegreeSocial: function(callback) {
+                    if(ContentPiece.data.links.length < 1 && typeof callback == 'function')
+                        return callback(ContentPiece.stats.secondarySocialCombined);
+
                     _.each(ContentPiece.data.links, function(link,i) {
                         link.social(function() {
                             if(i+1== ContentPiece.data.links.length) {
@@ -154,7 +157,7 @@ angular.module("artemis-content",[])
 
                     // Get info on this link.
                     $.ajax({
-                        url: "mozapi.php",
+                        url: "php/mozapi.php",
                         type: "POST",
                         data: {
                             url: "/links/" + encodeURIComponent(ContentPiece.data.url)
@@ -202,11 +205,72 @@ angular.module("artemis-content",[])
 
                         if(ContentPiece.data.knownLinks.length > 0) {
                             console.log("Getting data on %i previously known links.",ContentPiece.data.knownLinks.length)
-                            mergeInKnownLinks(havePageData);
+                            mergeInKnownLinks(havePageData,eliminateDuplicates);
                         } else {
                             console.log("Was not provided with any known links");
+                            eliminateDuplicates();
                         }
+                    }
 
+                    function mergeInKnownLinks(havePageData,cb) {
+
+                        var knownLinkDomains = havePageData ?
+                                                // Use pages as input
+                                                ContentPiece.data.knownLinks
+                                                // Or else get the root domains of the input pages
+                                                : _.map(ContentPiece.data.knownLinks, function(link) {
+                                                    return Utils.parseUri(link).authority;
+                                                });
+
+                        $.ajax({
+                            url: "php/mozapi.php",
+                            type: "POST",
+                            data: {
+                                url: "/url-metrics/"
+                                   + "?"
+                                   + "&Cols="
+                                   + (4 + 68719476736), // Canon URL + DA of source,
+                                array:  knownLinkDomains
+                            },
+                            error: function(msg) { console.warn(msg); },
+                            success: function(res) {
+                                var links = JSON.parse(res);
+                                links = _.filter(links, function(link) { return link.uu.length > 5 });
+                                var knownLinksData = [];
+
+                                // Turn into propa links
+                                _.each(links, function(link) {
+                                    if(link.length === 0) return false;
+
+                                    var url = _.find(ContentPiece.data.knownLinks, function(known) {
+                                                    if(known.length < 6) { return false; }
+                                                    var verdict =  link.uu.indexOf(known) > -1
+                                                                || known.indexOf(link.uu) > -1;
+                                                    return verdict;
+                                                }) || link.uu;
+                                    console.log(url,typeof link.uu)
+                                    if(typeof url != 'undefined') {
+                                        var linkObject = new ContentLink({
+                                            title: link.ut,
+                                            url: url,
+                                            equitable: !Utils.lfBitFlag(link.lf),
+                                            domainAuthority: link.pda,
+                                            known: true,
+                                            relevant: true
+                                        });
+                                        knownLinksData.push(linkObject)
+                                    };
+                                });
+
+                                // Merge into found links dataset
+                                Utils.mergeByProperty(ContentPiece.data.links,knownLinksData,'url');
+
+                                cb();
+                            }
+                        });
+                    }
+
+                    function eliminateDuplicates() {
                         // Ensure there are no multiple checked URLs per domain
                         _.each(ContentPiece.data.links, function(link) {
                             if(link.domainRepresentative) {
@@ -219,61 +283,6 @@ angular.module("artemis-content",[])
 
                         // Dun.
                         if (typeof callback == 'function') callback(ContentPiece.data.links);
-                    }
-
-                    function mergeInKnownLinks(havePageData) {
-
-                        var knownLinkDomains = havePageData ?
-                                                // Use pages as input
-                                                ContentPiece.data.knownLinks
-                                                // Or else get the root domains of the input pages
-                                                : _.map(ContentPiece.data.knownLinks, function(link) {
-                                                    return Utils.parseUri(link).authority;
-                                                });
-
-                        console.log(knownLinkDomains);
-
-                        $.ajax({
-                            url: "mozapi.php",
-                            type: "POST",
-                            data: {
-                                url: "/url-metrics/"
-                                   + "?"
-                                   + "&Cols="
-                                   + (4 + 68719476736), // Canon URL + DA of source,
-                                array:  knownLinkDomains
-                            },
-                            error: function(msg) { console.warn(msg); },
-                            success: function(res) {
-                                var links = JSON.parse(res);
-                                var knownLinksData = [];
-
-                                // Turn into propa links
-                                _.each(links, function(link) {
-                                    var url = _.find(ContentPiece.data.knownLinks, function(potentialURL) {
-                                                    return (
-                                                        link.uu.indexOf(Utils.parseUri(potentialURL).authority) > -1
-                                                     || Utils.parseUri(potentialURL).authority.indexOf(link.uu) > -1
-                                                    );
-                                                });
-                                    console.log(link.uu,url);
-                                    var linkObject = new ContentLink({
-                                        title: link.ut,
-                                        url: url,
-                                        equitable: !Utils.lfBitFlag(link.lf),
-                                        domainAuthority: link.pda,
-                                        known: true,
-                                        relevant: true
-                                    });
-                                    knownLinksData.push(linkObject)
-                                });
-
-                                // Merge into found links dataset
-                                Utils.mergeByProperty(ContentPiece.data.links, knownLinksData, 'url');
-
-                                if (typeof callback == 'function') callback(ContentPiece.data.links);
-                            }
-                        });
                     }
                 },
             },
