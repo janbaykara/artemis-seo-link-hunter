@@ -224,6 +224,8 @@ angular.module("artemis-content",[])
                                                     return Utils.parseUri(link).authority;
                                                 });
 
+                        console.log(knownLinkDomains);
+
                         $.ajax({
                             url: "mozapi.php",
                             type: "POST",
@@ -234,9 +236,7 @@ angular.module("artemis-content",[])
                                    + (4 + 68719476736), // Canon URL + DA of source,
                                 array:  knownLinkDomains
                             },
-                            error: function(msg) {
-                                console.warn(msg);
-                            },
+                            error: function(msg) { console.warn(msg); },
                             success: function(res) {
                                 var links = JSON.parse(res);
                                 var knownLinksData = [];
@@ -249,7 +249,7 @@ angular.module("artemis-content",[])
                                         url: _.find(ContentPiece.data.knownLinks, function(potentialURL) {
                                             return ( link.uu == Utils.parseUri(potentialURL).authority );
                                         }),
-                                        equitable: !lfBitFlag(link.lf),
+                                        equitable: !Utils.lfBitFlag(link.lf),
                                         domainAuthority: link.pda,
                                         known: true,
                                         relevant: true
@@ -269,7 +269,10 @@ angular.module("artemis-content",[])
 
 
             stats: {
+
+                //////////////////////
                 // Useful calculations
+
                 linkValue: function() {
                     var totalLinkValue = 0;
                     _.each(ContentPiece.data.links, function(link) {
@@ -304,12 +307,19 @@ angular.module("artemis-content",[])
                     return ContentPiece.stats.value() - ContentPiece.stats.cost()
                 },
 
+
+                ////////////////////////////
                 // Informative summary calcs
 
                 averageDA: function() {
-                    return _.reduce(ContentPiece.data.links, function(stored, margin) {
-                        return stored + margin.domainAuthority;
-                    }, 0) / ContentPiece.data.links.length;
+                    var nUsefulLinks = 0
+                      , aggregateDA = _.reduce(ContentPiece.data.links, function(stored, margin) {
+                                            if(margin.equitable && margin.domainRepresentative) {
+                                                nUsefulLinks++;
+                                                return stored + margin.domainAuthority;
+                                            } else return stored;
+                                        }, 0);
+                    return aggregateDA / nUsefulLinks;
                 },
 
                 socialCount: function(x) {
@@ -325,7 +335,7 @@ angular.module("artemis-content",[])
                     });
                 },
 
-                equitableLinkCount: function() {
+                usefulLinkCount: function() {
                     return _.filter(ContentPiece.data.links, function(link) {
                         return (link.domainRepresentative && link.equitable);
                     }).length;
