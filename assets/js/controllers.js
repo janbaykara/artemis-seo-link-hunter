@@ -2,7 +2,7 @@ angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
     })
-    .controller('input', function($scope,$state,$http,$window,ContentPiece,Utils) {
+    .controller('input', function($scope,$state,$http,$window,ContentPiece,GoogleAPI,Utils) {
 
         // Default values
         $scope.newPiece = {
@@ -85,59 +85,26 @@ angular.module("artemis")
             $scope.google = authObj;
             $scope.analytics.getAccounts();
         }
-
         $scope.analytics = {
             getAccounts: function() {
-                // GET  /management/accounts
-                $http({method:"GET",
-                    url: gaApiUrl+"/management/accounts",
-                    params: { "access_token": $scope.google.access_token }
-                }).success(function(data) { $scope.google.accounts = data.items; })
+                GoogleAPI.getAccounts($scope,function(data) {
+                    $scope.google.accounts = data.items;
+                });
             },
             getWebProperties: function() {
-                $http({method:"GET",
-                    url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties",
-                    params: { "access_token": $scope.google.access_token }
-                }).success(function(data) { $scope.google.webproperties = data.items; })
+                GoogleAPI.getWebProperties($scope,function(data) {
+                    $scope.google.webproperties = data.items;
+                });
             },
             getViews: function() {
-                $http({method:"GET",
-                    url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties/"+$scope.google.webproperty+"/profiles",
-                    params: { "access_token": $scope.google.access_token }
-                }).success(function(data) { $scope.google.views = data.items; })
+                GoogleAPI.getViews($scope,function(data) {
+                    $scope.google.views = data.items;
+                });
             },
             getReferralData: function() {
-                // Form today's YYYY-MM-DD date
-                function pad(n){return n<10 ? '0'+n : n}
-                var d = new Date();
-                var dd = pad(d.getDate());
-                var mm = pad(d.getMonth()+1);
-                var yyyy = d.getFullYear();
-                var dateToday = yyyy+"-"+mm+"-"+dd;
-
-                // Get
-                $.ajax({
-                    url: gaApiUrl+"/data/ga",
-                    method: "GET",
-                    data: {
-                        "access_token": $scope.google.access_token,
-                        "ids": "ga:"+$scope.google.view,
-                        "dimensions": "ga:source,ga:referralPath",
-                        "metrics": "ga:pageviews,ga:visits",
-                        "sort": "-ga:visits",
-                        "filters": "ga:pagePath=="+Utils.parseUri($scope.newPiece.url).path+";ga:medium==referral;ga:referralPath!=/",
-                        "max-results": 100,
-                        "start-date": $scope.newPiece.date,
-                        "end-date": dateToday
-                    },
-                    success: function(data) {
-                        $scope.newPiece.referralTraffic
-                            = $scope.google.referralData = _.map(data.rows, function(row) {
-                                console.log(row);
-                                return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
-                            });
-                    }
-                });
+                GoogleAPI.getReferralData($scope,function(data) {
+                    $scope.google.trafficData = data;
+                })
             }
         }
     })
