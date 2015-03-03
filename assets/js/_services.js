@@ -312,7 +312,7 @@ angular.module("artemis-content",[])
                                     var thisURL = JSON.parse(res).linkingFrom;
                                     if(typeof options.eachLink === 'function')
                                         options.eachLink(thisURL,links)
-                                    if(i >= buzzstreamData.numResults-1 && typeof options.then === 'function')
+                                    if(i >= buzzstreamData.numResults-1 && typeof options.onFinished === 'function')
                                         options.onFinished(links);
                                 }
                             });
