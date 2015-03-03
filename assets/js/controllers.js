@@ -7,10 +7,10 @@ angular.module("artemis")
         // Default values
         $scope.newPiece = {
             inputLinks: "",
-            name: "TastingBoutique We Miss You campaign",
-            url: "http://www.tastingboutique.com/wemissyou",
-            billableHours: 5,
-            date: "2008-04-03"
+            name: "Periodic Table of Chillis",
+            url: "http://www.appliancecity.co.uk/chilli/",
+            billableHours: 20,
+            date: "2013-05-03"
         };
 
         // ng-click()
@@ -67,11 +67,16 @@ angular.module("artemis")
                 }
             });
         }
+    })
+    .controller('output', function($scope,$state,$sce,$window,ContentPiece,GoogleAPI,Utils) {
+        if(!ContentPiece.initialised()) $state.go('app.input');
+        $scope.ContentPiece = ContentPiece;
+        $scope.hideDuplicates = true;
+        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
 
         ///////////////////
         //// GOOGLE ANALYTICS REFERRAL TRAFFIC
         ///////////////////
-        var gaApiUrl = "https://www.googleapis.com/analytics/v3";
         $scope.googleAnalytics = function() {
             console.log("Auth'ing with Google, for analytics data.")
             var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
@@ -79,7 +84,7 @@ angular.module("artemis")
                             + "&response_type=token"
                             + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
                             + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
-            var w = Utils.popupWindow(oauthURL,"_blank",600,600);
+            var w = Utils.popupWindow(oauthURL,"_blank",600,400);
         }
         $window.authParams = function(authObj) {
             $scope.google = authObj;
@@ -102,17 +107,17 @@ angular.module("artemis")
                 });
             },
             getReferralData: function() {
-                GoogleAPI.getReferralData($scope,function(data) {
-                    $scope.google.trafficData = data;
+                GoogleAPI.getReferralData($scope,function(trafficData) {
+                    $scope.google.trafficData = trafficData;
+                    _.each(ContentPiece.data.links, function(eachLink) {
+                        eachLink.referral = _.find(trafficData,function(referralLink) {
+                                                return eachLink.indexOf(referralLink) > -1
+                                                    || referralLink.indexOf(eachLink) > -1;
+                                            }) || null;
+                    })
                 })
             }
         }
-    })
-    .controller('output', function($scope,$state,$sce,ContentPiece,Utils) {
-        if(!ContentPiece.initialised()) $state.go('app.input');
-        $scope.ContentPiece = ContentPiece;
-        $scope.hideDuplicates = true;
-        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
     })
     .filter('sup', function($sce) {
         return function(input) {

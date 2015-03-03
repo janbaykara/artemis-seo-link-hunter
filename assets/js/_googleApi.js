@@ -48,7 +48,13 @@ angular.module('artemis-content')
                     },
                     success: function(data) {
                         var rows = scope.google.referralData = _.map(data.rows, function(row) {
-                                return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
+                                return {
+                                    source:row[0],
+                                    referralPath:row[1],
+                                    pageViews:row[2],
+                                    visits:row[3],
+                                    url: row[0]+""+row[1]
+                                };
                             });
                         cb(rows);
                     }
