@@ -76,7 +76,7 @@ angular.module("artemis-content")
                 }
                 while (bitpointer > 0)
 
-                isNoFollow = _.any(bitFlags, function(bitflag) {
+                var isNoFollow = _.any(bitFlags, function(bitflag) {
                     return bitflag === 1;
                 })
                 // console.log(bitFlags)

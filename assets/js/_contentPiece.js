@@ -77,11 +77,11 @@ angular.module("artemis-content")
                     // Get info on this link.
                     $.ajax({
                         url: "php/mozapi.php",
-                        type: "GET",
+                        type: "POST",
                         data: {
                             url: "/links/" + encodeURIComponent(ContentPiece.data.url)
                                 + "?"
-                                + "&Scope=page_to_page"
+                                + "Scope=page_to_page"
                                 + "&Sort=domain_authority"
                                 + "&LinkCols=2" // Flags full of data on each link
                                 + "&TargetCols=32" // No. of links
@@ -143,12 +143,11 @@ angular.module("artemis-content")
 
                         $.ajax({
                             url: "php/mozapi.php",
-                            type: "GET",
+                            type: "POST",
                             data: {
                                 url: "/url-metrics/"
                                    + "?"
-                                   + "&Cols="
-                                   + (4 + 68719476736), // Canon URL + DA of source,
+                                   + "Cols="+(4 + 68719476736), // Canon URL + DA of source,
                                 array:  knownLinkDomains
                             },
                             error: function(msg) { console.warn(msg); },
@@ -209,7 +208,7 @@ angular.module("artemis-content")
             buzzstreamLinks: function(options) {
                 $.ajax({
                     url: "php/buzzstream.php",
-                    type: "GET", data: {
+                    type: "POST", data: {
                         url: "https://api.buzzstream.com/v1/links?linking_to="+options.url,
                         key: options.key,
                         secret: options.secret
@@ -221,7 +220,7 @@ angular.module("artemis-content")
                         _.each(links, function(link,i) {
                             $.ajax({
                                 url: "php/buzzstream.php",
-                                type: "GET", data: {
+                                type: "POST", data: {
                                     url: link,
                                     key: options.key,
                                     secret: options.secret
