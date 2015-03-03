@@ -1,13 +1,13 @@
 <?php
-$objectURL = $_POST['url'];
-$batchedData = $_POST['array'];
-if($batchedData) {
+$objectURL = $_GET['url'];
+$batchedData = $_GET['array'];
+if(isset($batchedData)) {
     $encodedData = json_encode($batchedData);
 }
 /**
 */
 $accessID = "member-c585999055";
-$secretKey = "79fb24f5736619a2029d7da68fbd88ec";
+$secretKey = "676396e4e393d3ec091fe91a2bd41eee";
 /*
 **/
 

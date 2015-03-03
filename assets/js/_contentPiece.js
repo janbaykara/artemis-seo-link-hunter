@@ -77,7 +77,7 @@ angular.module("artemis-content")
                     // Get info on this link.
                     $.ajax({
                         url: "php/mozapi.php",
-                        type: "POST",
+                        type: "GET",
                         data: {
                             url: "/links/" + encodeURIComponent(ContentPiece.data.url)
                                 + "?"
@@ -92,7 +92,6 @@ angular.module("artemis-content")
                             console.warn(msg);
                         },
                         success: function(res) {
-                            console.log(res);
                             var links = JSON.parse(res)
                               , havePageData = true;
                             if(links.length == 0) havePageData = false
@@ -144,7 +143,7 @@ angular.module("artemis-content")
 
                         $.ajax({
                             url: "php/mozapi.php",
-                            type: "POST",
+                            type: "GET",
                             data: {
                                 url: "/url-metrics/"
                                    + "?"
@@ -210,7 +209,7 @@ angular.module("artemis-content")
             buzzstreamLinks: function(options) {
                 $.ajax({
                     url: "php/buzzstream.php",
-                    type: "POST", data: {
+                    type: "GET", data: {
                         url: "https://api.buzzstream.com/v1/links?linking_to="+options.url,
                         key: options.key,
                         secret: options.secret
@@ -222,7 +221,7 @@ angular.module("artemis-content")
                         _.each(links, function(link,i) {
                             $.ajax({
                                 url: "php/buzzstream.php",
-                                type: "POST", data: {
+                                type: "GET", data: {
                                     url: link,
                                     key: options.key,
                                     secret: options.secret
