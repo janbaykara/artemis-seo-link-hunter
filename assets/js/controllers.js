@@ -2,14 +2,15 @@ angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
     })
-    .controller('input', function($scope,$state,$http,ContentPiece,Utils) {
+    .controller('input', function($scope,$state,$http,$window,ContentPiece,Utils) {
 
         // Default values
         $scope.newPiece = {
             inputLinks: "",
-            name: "The Periodic Table of Chillis",
-            url: "http://www.appliancecity.co.uk/chilli/",
-            billableHours: 20
+            name: "TastingBoutique We Miss You campaign",
+            url: "http://www.tastingboutique.com/wemissyou",
+            billableHours: 5,
+            date: "2008-04-03"
         };
 
         // ng-click()
@@ -66,61 +67,70 @@ angular.module("artemis")
                 }
             });
         }
-    })
-    .controller('output', function($scope,$state,ContentPiece,Utils,$sce,$window) {
-        if(!ContentPiece.initialised()) $state.go('app.input');
-        $scope.ContentPiece = ContentPiece;
-        $scope.hideDuplicates = true;
-        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
 
         ///////////////////
         //// GOOGLE ANALYTICS REFERRAL TRAFFIC
         ///////////////////
-        $window.authParams = function(x) {
-            console.log(x);
-        }
         $scope.googleAnalytics = function() {
+            console.log("Auth'ing with Google, for analytics data.")
             var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
                             + "&scope=https://www.googleapis.com/auth/analytics.readonly"
                             + "&response_type=token"
                             + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
                             + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
             var w = Utils.popupWindow(oauthURL,"_blank",600,600);
-            /*
-            function onAuth(access_token) {
-
-                // Convert this to a URL
-                // $ga->requestReportData(
-                //     ga_profile_id,
-                //     array('source','referralPath'),//what field you are looking for
-                //     array('pageviews','visits'),//what metric you want to calculate
-                //     '-visits',//sort order, prefix - means descending
-                //     'ga:pagePath==/wemissyou && medium==referral && referralPath != /',//filter query
-                //     null,//start: yyyy-mm-dd or null
-                //     null,//end: yyyy-mm-dd or null
-                //     1,//offset lookup
-                //     100//max result
-                // );
-
-                $http.get("https://www.googleapis.com/analytics/v3/data", {
-                    "access_token": access_token,
-                    "ids": "ga:12345",
-                    "dimensions": "ga:source,ga:medium",
-                    "metrics": "ga:sessions,ga:bounces",
-                    "sort": "-ga:sessions",
-                    "filters": "ga:medium%3D%3Dreferral",
-                    "segment": "gaid::-10 OR segment: sessions::condition::ga:medium%3D%3Dreferral",
-                    "start-date": "2008-10-01",
-                    "end-date": "2008-10-31",
-                    "start-index": 10,
-                    "max-results": 100,
-                    "prettyprint": true
-                }).success(function(a,b,c) {
-                    console.log(a,b,c);
-                })
-            }
-            */
         }
+        $window.authParams = function(authObj) {
+            $scope.google = authObj;
+            onAuth();
+        }
+        function onAuth() {
+            // Get list from `Management API`
+            $scope.google.viewID = "ga:63202767";
+            getReferralData();
+        }
+
+        //access_token,viewID,targetURL,callback
+        $scope.getReferralData = function() {
+            // Form today's YYYY-MM-DD date
+            function pad(n){return n<10 ? '0'+n : n}
+            var d = new Date();
+            var dd = pad(d.getDate());
+            var mm = pad(d.getMonth()+1);
+            var yyyy = d.getFullYear();
+            var dateToday = yyyy+"-"+mm+"-"+dd;
+
+            // Get
+            $.ajax({
+                url: "https://www.googleapis.com/analytics/v3/data/ga",
+                method: "GET",
+                data: {
+                    "access_token": $scope.google.access_token,
+                    "ids": $scope.google.viewID,
+                    "dimensions": "ga:source,ga:referralPath",
+                    "metrics": "ga:pageviews,ga:visits",
+                    "sort": "-ga:visits",
+                    "filters": "ga:pagePath=="+Utils.parseUri($scope.newPiece.url).path+";ga:medium==referral;ga:referralPath!=/",
+                    "max-results": 100,
+                    "start-date": $scope.newPiece.date,
+                    "end-date": dateToday
+                },
+                success: function(data) {
+                    console.log(data,data.rows);
+                    $scope.newPiece.referralTraffic = _.map(data.rows, function(row) {
+                                                            console.log(row);
+                                                            return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
+                                                        });
+                    console.log($scope.newPiece.referralTraffic);
+                }
+            });
+        }
+    })
+    .controller('output', function($scope,$state,$sce,ContentPiece,Utils) {
+        if(!ContentPiece.initialised()) $state.go('app.input');
+        $scope.ContentPiece = ContentPiece;
+        $scope.hideDuplicates = true;
+        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
     })
     .filter('sup', function($sce) {
         return function(input) {
