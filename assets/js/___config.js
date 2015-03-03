@@ -49,3 +49,5 @@ angular.module('artemis', ['ui.router','utils.dataVis','artemis-content'])
             $state.go('app.input');
         // });
     });
+
+angular.module("artemis-content",[])
