@@ -24,7 +24,6 @@
         <div class="form-group">
             <label for="input-content-url">Canonical URL</label>
             <input type="url" class="form-control" ng-model='newPiece.url' id="input-content-url" placeholder="Content URL" />
-            <button ng-click='googleAnalytics()' type='button' class='btn col-md-12'>Google Analytics</button>
         </div>
     </div>
     <div class='col-md-6'>
@@ -43,6 +42,20 @@
 </div>
 
 <div class='row'>
+    <div class='col-md-6'>
+        <button ng-click='googleAnalytics()' type='button' class='btn col-sm-12'>Google Analytics</button>
+    </div>
+    <div class='col-md-6'>
+        <select class='col-sm-4' ng-options="item.id as item.name for item in google.accounts"
+            ng-model="google.account" ng-change="getWebProperties()" ng-show='google.accounts'></select>
+        <select class='col-sm-4' ng-options="item.id as item.name for item in google.webproperties"
+            ng-model="google.webproperty" ng-change="getViews()" ng-show='google.webproperties'></select>
+        <select class='col-sm-4' ng-options="item.id as item.name for item in google.views"
+            ng-model="google.view" ng-change="getReferralData()" ng-show='google.views'></select>
+    </div>
+</div>
+
+<div class='row'>
     <div class='col-md-12'>
         <h3>Algorithm variables</h3>
         ...
@@ -54,3 +67,5 @@
         <button ng-click='analyse()' id='btn-hunt-links' type="button" class="btn btn-primary btn-lg btn-block">Analyse this content</button>
     </div>
 </div>
+
+{{google}}

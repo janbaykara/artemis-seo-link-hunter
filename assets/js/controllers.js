@@ -71,6 +71,7 @@ angular.module("artemis")
         ///////////////////
         //// GOOGLE ANALYTICS REFERRAL TRAFFIC
         ///////////////////
+        var gaApiUrl = "https://www.googleapis.com/analytics/v3";
         $scope.googleAnalytics = function() {
             console.log("Auth'ing with Google, for analytics data.")
             var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
@@ -85,9 +86,38 @@ angular.module("artemis")
             onAuth();
         }
         function onAuth() {
-            // Get list from `Management API`
-            $scope.google.viewID = "ga:63202767";
-            getReferralData();
+            // $scope.google.viewID = "ga:63202767";
+            getAccounts();
+        }
+
+        var getAccounts = function() {
+            // GET  /management/accounts
+            $http({method:"GET",
+                url: gaApiUrl+"/management/accounts",
+                params: { "access_token": $scope.google.access_token }
+            }).success(function(data) {
+                $scope.google.accounts = data.items;
+            })
+        }
+
+        $scope.getWebProperties = function() {
+            // GET  /management/accounts/accountId/webproperties
+            $http({method:"GET",
+                url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties",
+                params: { "access_token": $scope.google.access_token }
+            }).success(function(data) {
+                $scope.google.webproperties = data.items;
+            })
+        }
+
+        $scope.getViews = function() {
+            // GET  /management/accounts/accountId/webproperties/webPropertyId/profiles
+            $http({method:"GET",
+                url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties/"+$scope.google.webproperty+"/profiles",
+                params: { "access_token": $scope.google.access_token }
+            }).success(function(data) {
+                $scope.google.views = data.items;
+            })
         }
 
         //access_token,viewID,targetURL,callback
@@ -102,11 +132,11 @@ angular.module("artemis")
 
             // Get
             $.ajax({
-                url: "https://www.googleapis.com/analytics/v3/data/ga",
+                url: gaApiUrl+"/data/ga",
                 method: "GET",
                 data: {
                     "access_token": $scope.google.access_token,
-                    "ids": $scope.google.viewID,
+                    "ids": "ga:"+$scope.google.view,
                     "dimensions": "ga:source,ga:referralPath",
                     "metrics": "ga:pageviews,ga:visits",
                     "sort": "-ga:visits",
@@ -116,12 +146,11 @@ angular.module("artemis")
                     "end-date": dateToday
                 },
                 success: function(data) {
-                    console.log(data,data.rows);
-                    $scope.newPiece.referralTraffic = _.map(data.rows, function(row) {
-                                                            console.log(row);
-                                                            return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
-                                                        });
-                    console.log($scope.newPiece.referralTraffic);
+                    $scope.newPiece.referralTraffic
+                        = $scope.google.referralData = _.map(data.rows, function(row) {
+                            console.log(row);
+                            return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
+                        });
                 }
             });
         }
