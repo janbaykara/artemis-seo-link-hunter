@@ -1,8 +1,7 @@
 <?php
 $objectURL = $_POST['url'];
-$batchedData = $_POST['array'];
-if($batchedData) {
-    $encodedData = json_encode($batchedData);
+if(!empty($_POST['array'])) {
+    $encodedData = json_encode($_POST['array']);
 }
 /**
 */
@@ -28,7 +27,7 @@ $requestUrl = "http://lsapi.seomoz.com/linkscape".$objectURL."&AccessID=".$acces
 $options = array(
     CURLOPT_RETURNTRANSFER => true
 );
-if($encodedData) { $options[CURLOPT_POSTFIELDS] = $encodedData; }
+if(isset($encodedData)) { $options[CURLOPT_POSTFIELDS] = $encodedData; }
 
 $ch = curl_init($requestUrl);
 curl_setopt_array($ch, $options);
@@ -37,5 +36,4 @@ curl_close($ch);
 //
 
 echo $content;
-
 ?>
