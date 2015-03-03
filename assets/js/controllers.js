@@ -83,76 +83,62 @@ angular.module("artemis")
         }
         $window.authParams = function(authObj) {
             $scope.google = authObj;
-            onAuth();
-        }
-        function onAuth() {
-            // $scope.google.viewID = "ga:63202767";
-            getAccounts();
+            $scope.analytics.getAccounts();
         }
 
-        var getAccounts = function() {
-            // GET  /management/accounts
-            $http({method:"GET",
-                url: gaApiUrl+"/management/accounts",
-                params: { "access_token": $scope.google.access_token }
-            }).success(function(data) {
-                $scope.google.accounts = data.items;
-            })
-        }
+        $scope.analytics = {
+            getAccounts: function() {
+                // GET  /management/accounts
+                $http({method:"GET",
+                    url: gaApiUrl+"/management/accounts",
+                    params: { "access_token": $scope.google.access_token }
+                }).success(function(data) { $scope.google.accounts = data.items; })
+            },
+            getWebProperties: function() {
+                $http({method:"GET",
+                    url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties",
+                    params: { "access_token": $scope.google.access_token }
+                }).success(function(data) { $scope.google.webproperties = data.items; })
+            },
+            getViews: function() {
+                $http({method:"GET",
+                    url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties/"+$scope.google.webproperty+"/profiles",
+                    params: { "access_token": $scope.google.access_token }
+                }).success(function(data) { $scope.google.views = data.items; })
+            },
+            getReferralData: function() {
+                // Form today's YYYY-MM-DD date
+                function pad(n){return n<10 ? '0'+n : n}
+                var d = new Date();
+                var dd = pad(d.getDate());
+                var mm = pad(d.getMonth()+1);
+                var yyyy = d.getFullYear();
+                var dateToday = yyyy+"-"+mm+"-"+dd;
 
-        $scope.getWebProperties = function() {
-            // GET  /management/accounts/accountId/webproperties
-            $http({method:"GET",
-                url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties",
-                params: { "access_token": $scope.google.access_token }
-            }).success(function(data) {
-                $scope.google.webproperties = data.items;
-            })
-        }
-
-        $scope.getViews = function() {
-            // GET  /management/accounts/accountId/webproperties/webPropertyId/profiles
-            $http({method:"GET",
-                url: gaApiUrl+"/management/accounts/"+$scope.google.account+"/webproperties/"+$scope.google.webproperty+"/profiles",
-                params: { "access_token": $scope.google.access_token }
-            }).success(function(data) {
-                $scope.google.views = data.items;
-            })
-        }
-
-        //access_token,viewID,targetURL,callback
-        $scope.getReferralData = function() {
-            // Form today's YYYY-MM-DD date
-            function pad(n){return n<10 ? '0'+n : n}
-            var d = new Date();
-            var dd = pad(d.getDate());
-            var mm = pad(d.getMonth()+1);
-            var yyyy = d.getFullYear();
-            var dateToday = yyyy+"-"+mm+"-"+dd;
-
-            // Get
-            $.ajax({
-                url: gaApiUrl+"/data/ga",
-                method: "GET",
-                data: {
-                    "access_token": $scope.google.access_token,
-                    "ids": "ga:"+$scope.google.view,
-                    "dimensions": "ga:source,ga:referralPath",
-                    "metrics": "ga:pageviews,ga:visits",
-                    "sort": "-ga:visits",
-                    "filters": "ga:pagePath=="+Utils.parseUri($scope.newPiece.url).path+";ga:medium==referral;ga:referralPath!=/",
-                    "max-results": 100,
-                    "start-date": $scope.newPiece.date,
-                    "end-date": dateToday
-                },
-                success: function(data) {
-                    $scope.newPiece.referralTraffic
-                        = $scope.google.referralData = _.map(data.rows, function(row) {
-                            console.log(row);
-                            return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
-                        });
-                }
-            });
+                // Get
+                $.ajax({
+                    url: gaApiUrl+"/data/ga",
+                    method: "GET",
+                    data: {
+                        "access_token": $scope.google.access_token,
+                        "ids": "ga:"+$scope.google.view,
+                        "dimensions": "ga:source,ga:referralPath",
+                        "metrics": "ga:pageviews,ga:visits",
+                        "sort": "-ga:visits",
+                        "filters": "ga:pagePath=="+Utils.parseUri($scope.newPiece.url).path+";ga:medium==referral;ga:referralPath!=/",
+                        "max-results": 100,
+                        "start-date": $scope.newPiece.date,
+                        "end-date": dateToday
+                    },
+                    success: function(data) {
+                        $scope.newPiece.referralTraffic
+                            = $scope.google.referralData = _.map(data.rows, function(row) {
+                                console.log(row);
+                                return {source:row[0],referralPath:row[1],pageViews:row[2],visits:row[3]};
+                            });
+                    }
+                });
+            }
         }
     })
     .controller('output', function($scope,$state,$sce,ContentPiece,Utils) {

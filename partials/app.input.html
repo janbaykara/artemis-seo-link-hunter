@@ -49,19 +49,19 @@
         <div class='form-group col-sm-4' ng-show='google.accounts'>
             <label for="ga-1">Analytics Account</label>
             <select id='ga-1' class='form-control' ng-options="item.id as item.name for item in google.accounts"
-                ng-model="google.account" ng-change="getWebProperties()"></select>
+                ng-model="google.account" ng-change="analytics.getWebProperties()"></select>
         </div>
 
         <div class='form-group col-sm-4' ng-show='google.webproperties'>
             <label for="ga-2">Web Property</label>
             <select id='ga-2' class='form-control' ng-options="item.id as item.name for item in google.webproperties"
-                ng-model="google.webproperty" ng-change="getViews()"></select>
+                ng-model="google.webproperty" ng-change="analytics.getViews()"></select>
         </div>
 
         <div class='form-group col-sm-4' ng-show='google.views'>
             <label for="ga-3">View/Profile</label>
             <select id='ga-3' class='form-control' ng-options="item.id as item.name for item in google.views"
-                ng-model="google.view" ng-change="getReferralData()"></select>
+                ng-model="google.view" ng-change="analytics.getReferralData()"></select>
         </div>
     </div>
 </div>
