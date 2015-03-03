@@ -287,6 +287,39 @@ angular.module("artemis-content",[])
                 },
             },
 
+            buzzstreamLinks: function(options) {
+                $.ajax({
+                    url: "php/buzzstream.php",
+                    type: "POST", data: {
+                        url: "https://api.buzzstream.com/v1/links?linking_to="+options.url,
+                        key: options.key,
+                        secret: options.secret
+                    },
+                    error: function(msg) { console.warn(msg); },
+                    success: function(res) {
+                        var buzzstreamData = JSON.parse(res);
+                        var links = buzzstreamData.list;
+                        _.each(links, function(link,i) {
+                            $.ajax({
+                                url: "php/buzzstream.php",
+                                type: "POST", data: {
+                                    url: link,
+                                    key: options.key,
+                                    secret: options.secret
+                                },
+                                error: function(msg) { console.warn(msg); },
+                                success: function(res) {
+                                    var thisURL = JSON.parse(res).linkingFrom;
+                                    if(typeof options.eachLink === 'function')
+                                        options.eachLink(thisURL,links)
+                                    if(i >= buzzstreamData.numResults-1 && typeof options.then === 'function')
+                                        options.onFinished(links);
+                                }
+                            });
+                        })
+                    }
+                });
+            },
 
             stats: {
 
@@ -396,6 +429,23 @@ angular.module("artemis-content",[])
         };
 
         var Utils = {
+
+            cleanArray: function(actual){
+              var newArray = new Array();
+              for(var i = 0; i<actual.length; i++){
+                  if (actual[i]){
+                    newArray.push(actual[i]);
+                }
+              }
+              return newArray;
+            },
+
+            popupWindow: function(url, title, w, h) {
+              var left = (screen.width/2)-(w/2);
+              var top = (screen.height/2)-(h/2);
+              return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, width='+w+', height='+h+', top='+top+', left='+left);
+            },
+
             mergeByProperty: function(arr1, arr2, prop) {
                 _.each(arr2, function(arr2obj) {
                     var arr1obj = _.find(arr1, function(arr1obj) {

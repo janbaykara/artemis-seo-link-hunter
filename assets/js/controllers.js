@@ -1,12 +1,8 @@
-function authParams(x) {
-    console.log(x);
-}
-
 angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
     })
-    .controller('input', function($scope,$state,ContentPiece,$http) {
+    .controller('input', function($scope,$state,$http,ContentPiece,Utils) {
 
         // Default values
         $scope.newPiece = {
@@ -38,20 +34,12 @@ angular.module("artemis")
             });
         }
 
-        function cleanArray(actual){
-          var newArray = new Array();
-          for(var i = 0; i<actual.length; i++){
-              if (actual[i]){
-                newArray.push(actual[i]);
-            }
-          }
-          return newArray;
-        }
-
+        ///////////////////
+        //// KNOWN LINKS + BUZZSTREAM INTEGRATION
+        ///////////////////
         $scope.knownLinks = function() {
-            return cleanArray($scope.newPiece.inputLinks.split("\n"));
+            return Utils.cleanArray($scope.newPiece.inputLinks.split("\n"));
         }
-
         $scope.buzzstream = {
             done: false,
             doing: false,
@@ -59,33 +47,45 @@ angular.module("artemis")
             key: 'f41fb799-2865-4621-94a0-97091d515d21',
             secret: 'VgZzmN7AYLRw36An0pFFh_Z-0kCXhnT67pUqX3-f-83c6Jp-PuuoMe9FiS_SdA6v'
         }
-
-        function popupWindow(url, title, w, h) {
-          var left = (screen.width/2)-(w/2);
-          var top = (screen.height/2)-(h/2);
-          return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, width='+w+', height='+h+', top='+top+', left='+left);
+        $scope.fetchBuzzstream = function() {
+            $scope.buzzstream.done = false;
+            $scope.buzzstream.doing = true;
+            ContentPiece.buzzstreamLinks({
+                url: $scope.newPiece.url,
+                key: $scope.buzzstream.key,
+                secret: $scope.buzzstream.secret,
+                eachLink: function(thisURL,links) {
+                    // Add to textarea
+                    $scope.$apply(function() { $scope.newPiece.inputLinks += "\n"+thisURL; });
+                },
+                onFinished: function(links) {
+                    $scope.$apply(function() {
+                        $scope.buzzstream.doing = false;
+                        $scope.buzzstream.done = true;
+                    });
+                }
+            });
         }
+    })
+    .controller('output', function($scope,$state,ContentPiece,Utils,$sce,$window) {
+        if(!ContentPiece.initialised()) $state.go('app.input');
+        $scope.ContentPiece = ContentPiece;
+        $scope.hideDuplicates = true;
+        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
 
+        ///////////////////
+        //// GOOGLE ANALYTICS REFERRAL TRAFFIC
+        ///////////////////
+        $window.authParams = function(x) {
+            console.log(x);
+        }
         $scope.googleAnalytics = function() {
-            // OAuth for what
-            // Replace with window.open -> get oauth token back to here, then proceed with gapi.class.php query
-            // $http.get("https://accounts.google.com/o/oauth2/auth", {
-            //     "scope": "https://www.googleapis.com/auth/analytics.readonly",
-            //     "response_type": "token",
-            //     "client_id": "696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com",
-            //     "redirect_uri": "http://www.boom-online.co.uk/playground/boom/artemis/"
-            // }).success(function(a,b,c) {
-            //     console.log(a,b,c);
-            // })
             var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
                             + "&scope=https://www.googleapis.com/auth/analytics.readonly"
                             + "&response_type=token"
                             + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
                             + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
-            var w = popupWindow(oauthURL,"_blank",600,600);
-            // get access_token obj back from `w`
-            // w.close();
-
+            var w = Utils.popupWindow(oauthURL,"_blank",600,600);
             /*
             function onAuth(access_token) {
 
@@ -121,51 +121,6 @@ angular.module("artemis")
             }
             */
         }
-
-        $scope.fetchBuzzstream = function() {
-            $scope.buzzstream.done = false;
-            $scope.buzzstream.doing = true;
-            $.ajax({
-                url: "php/buzzstream.php",
-                type: "POST", data: {
-                    url: "https://api.buzzstream.com/v1/links?linking_to="+$scope.newPiece.url,
-                    key: $scope.buzzstream.key,
-                    secret: $scope.buzzstream.secret
-                },
-                error: function(msg) { console.warn(msg); },
-                success: function(res) {
-                    var buzzstreamData = JSON.parse(res);
-                    var links = buzzstreamData.list;
-                    _.each(links, function(link,i) {
-                        $.ajax({
-                            url: "php/buzzstream.php",
-                            type: "POST", data: {
-                                url: link,
-                                key: $scope.buzzstream.key,
-                                secret: $scope.buzzstream.secret
-                            },
-                            error: function(msg) { console.warn(msg); },
-                            success: function(res) {
-                                var thisURL = JSON.parse(res).linkingFrom;
-                                $scope.$apply(function() { $scope.newPiece.inputLinks += "\n"+thisURL; });
-                                if(i >= buzzstreamData.numResults-1) {
-                                    $scope.$apply(function() {
-                                        $scope.buzzstream.doing = false;
-                                        $scope.buzzstream.done = true;
-                                    });
-                                }
-                            }
-                        });
-                    })
-                }
-            });
-        }
-    })
-    .controller('output', function($scope,$state,ContentPiece,$sce) {
-        if(!ContentPiece.initialised()) $state.go('app.input');
-        $scope.ContentPiece = ContentPiece;
-        $scope.hideDuplicates = true;
-        $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
     })
     .filter('sup', function($sce) {
         return function(input) {
