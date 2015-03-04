@@ -85,38 +85,45 @@ angular.module("artemis")
                             + "&response_type=token"
                             + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
                             + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
-            var w = Utils.popupWindow(oauthURL,"_blank",600,400);
+            var w = Utils.popupWindow(oauthURL,"_blank",500,500);
         }
         $window.authParams = function(authObj) {
-            $scope.google = authObj;
+            $scope.GoogleAPI = GoogleAPI;
+            $scope.GoogleAPI.access_token = authObj.access_token;
+            $scope.GoogleAPI.ContentPiece = $scope.ContentPiece;
             $scope.analytics.getAccounts();
         }
         $scope.analytics = {
             getAccounts: function() {
-                GoogleAPI.getAccounts($scope,function(data) {
-                    $scope.google.accounts = data.items;
+                $scope.GoogleAPI.getAccounts(function(data) {
+                    $scope.GoogleAPI.accounts = data.items;
                 });
             },
             getWebProperties: function() {
-                GoogleAPI.getWebProperties($scope,function(data) {
-                    $scope.google.webproperties = data.items;
+                $scope.GoogleAPI.getWebProperties(function(data) {
+                    $scope.GoogleAPI.webproperties = data.items;
                 });
             },
             getViews: function() {
-                GoogleAPI.getViews($scope,function(data) {
-                    $scope.google.views = data.items;
+                $scope.GoogleAPI.getViews(function(data) {
+                    $scope.GoogleAPI.views = data.items;
                 });
             },
             getReferralData: function() {
-                GoogleAPI.getReferralData($scope,function(trafficData) {
-                    $scope.google.trafficData = trafficData;
-                    _.each(ContentPiece.data.links, function(eachLink) {
-                        eachLink.referral = _.find(trafficData,function(referralLink) {
-                                                return eachLink.indexOf(referralLink) > -1
-                                                    || referralLink.indexOf(eachLink) > -1;
-                                            }) || null;
-                    })
-                })
+                $scope.GoogleAPI.getReferralData(
+                    function(trafficData) {
+                        console.log(trafficData);
+                        $scope.GoogleAPI.trafficData = trafficData;
+                        _.each(ContentPiece.data.links, function(eachLink) {
+                            console.log(eachLink);
+                            // Try to match up ContentLinks with trafficData links
+                            eachLink.referral = _.find(trafficData,function(referralLink) {
+                                                    return (eachLink.url.indexOf(referralLink.url) > -1 || referralLink.url.indexOf(eachLink.url) > -1);
+                                                }) || null;
+                            console.log(eachLink.referral);
+                        })
+                    }
+                )
             }
         }
     })
