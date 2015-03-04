@@ -231,3 +231,16 @@ sup {
     font-weight: bold;
   }
 }
+
+.hasReferrals .link-graph__views-bar {
+  background: rgba(0,0,0,.15);
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  height: auto !important;
+  font-size: 12px;
+  padding: 5px;
+}
+.link-graph__row:nth-child(odd) .hasReferrals .link-graph__views-bar {
+  background: rgba(0,0,0,.075) !important;
+}

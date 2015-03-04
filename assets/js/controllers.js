@@ -115,14 +115,21 @@ angular.module("artemis")
                         $scope.GoogleAPI.trafficData = trafficData;
                         _.each(ContentPiece.data.links, function(eachLink) {
                             // Try to match up ContentLinks with trafficData links
-                            eachLink.referrals = _.find(trafficData,function(referralLink) {
-                                                    return (eachLink.url.indexOf(referralLink.url));
-                                                });
-                            if(typeof eachLink.referrals != 'undefined') console.log(eachLink);
+                            $scope.$apply(function() {
+                                eachLink.referrals = _.find(trafficData,function(referralLink) {
+                                                        return (eachLink.url.indexOf(referralLink.url) > -1);
+                                                    });
+                            });
                         })
+                        // _.each(trafficData,function(datum) {
+                        //     console.log(datum.url+" ===> "+datum.visits)
+                        // })
                     }
                 )
             }
+        }
+        $scope.logX = function(val,x) {
+          return Math.log(val) / Math.log(x);
         }
     })
     .filter('sup', function($sce) {
