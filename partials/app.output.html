@@ -207,7 +207,7 @@
                         </td>
                         <td class='link-graph__url'>
                             <div class='link-graph__da-bar' style='width:{{link.domainAuthority}}%;
-                                border-color: hsla({{link.domainAuthority|normalise:0:100:45:0}},80%,40%,0.3)'>
+                                border-color: hsla({{link.domainAuthority|normalise:0:100:45:0}},80%,40%,0.5)'>
                             </div>
                             <div class='tr'>
                                 <a href='{{link.url}}' target='_blank' class='link-graph__authority'>{{link.domain}}</a>
@@ -220,7 +220,7 @@
                             <div ng-show='!link.domainRepresentative' class='disqualifier'>Duplicate</div>
                         </td>
                         <td class='link-graph__views link-graph__value'>
-                            <div>{{link.referral.views}}</div>
+                            <div>{{link.referrals.views}}</div>
                         </td>
                     </tr>
                 </tbody>

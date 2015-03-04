@@ -112,15 +112,13 @@ angular.module("artemis")
             getReferralData: function() {
                 $scope.GoogleAPI.getReferralData(
                     function(trafficData) {
-                        console.log(trafficData);
                         $scope.GoogleAPI.trafficData = trafficData;
                         _.each(ContentPiece.data.links, function(eachLink) {
-                            console.log(eachLink);
                             // Try to match up ContentLinks with trafficData links
-                            eachLink.referral = _.find(trafficData,function(referralLink) {
-                                                    return (eachLink.url.indexOf(referralLink.url) > -1 || referralLink.url.indexOf(eachLink.url) > -1);
-                                                }) || null;
-                            console.log(eachLink.referral);
+                            eachLink.referrals = _.find(trafficData,function(referralLink) {
+                                                    return (eachLink.url.indexOf(referralLink.url));
+                                                });
+                            if(typeof eachLink.referrals != 'undefined') console.log(eachLink);
                         })
                     }
                 )
