@@ -2,88 +2,7 @@
 /// Services
 //////////////////////
 
-angular.module("artemis-content",[])
-    .factory('ContentShares', function(Utils) {
-        var shareRegister = function(data) {
-            var shareObj = {
-                twitter:      { importance: 1, icon: "fa fa-twitter",         count: data.Twitter, name: "Twitter mentions" },
-                facebook:     { importance: 1, icon: "fa fa-facebook",        count: data.Facebook.like_count + data.Facebook.share_count, name: "Facebook likes/shares" },
-                google:       { importance: 1, icon: "fa fa-google",          count: data.GooglePlusOne, name: "Google +1s" },
-                other:        { importance: 1, icon: "fa fa-share-alt",       count: data.Buzz + data.Delicious + data.LinkedIn + data.Pinterest + data.Reddit + data.StumbleUpon, name: "Other mentions/shares" },
-                buzz:         { importance: 2, icon: "fa fa-arrow-circle-up", count: data.Buzz, name: "Buzzfeed" },
-                delicious:    { importance: 2, icon: "fa fa-delicious",       count: data.Delicious, name: "Delicious" },
-                linkedin:     { importance: 2, icon: "fa fa-linkedin",        count: data.LinkedIn, name: "LinkedIn" },
-                pinterest:    { importance: 2, icon: "fa fa-pinterest",       count: data.Pinterest, name: "Pinterest" },
-                reddit:       { importance: 2, icon: "fa fa-reddit",          count: data.Reddit, name: "Reddit" },
-                stumbleupon:  { importance: 2, icon: "fa fa-stumbleupon",     count: data.StumbleUpon, name: "StumbleUpon" }
-            }
-            return shareObj;
-        };
-        return shareRegister;
-    })
-    .factory('ContentLink', function(Utils,ContentShares) {
-        var ContentLink = function() {
-            this.url = "";
-            this.domainAuthority = 0;
-            this.known = false;
-            this.relevant = true;
-            this.domainRepresentative = true;
-            this.equitable = true;
-            this.baseValue = 150;
-            this.irrelevantLinkModifier = -50;
-            this.relevantLinkModifier = 10;
-            this.shares = null;
-
-            for(var prop in arguments[0])   {
-                this[prop] = arguments[0][prop];
-            }
-
-            if(this.url.indexOf("http") == -1) // Add HTTP to all
-                this.url = "http://"+this.url;
-            if(this.url.indexOf("www.") > -1) // Remove all www's
-                this.url = this.url.replace(/(\/{0,2})www\./g,'$1');
-
-            this.domain = Utils.parseUri(this.url).authority;
-        }
-        ContentLink.prototype = {
-            value: function () {
-                var link = this
-                  , domainValue = link.baseValue * ( link.domainAuthority / 100 + 1 );
-
-                if(link.equitable && this.domainRepresentative) {
-                    var value = link.relevant
-                            ? domainValue + link.relevantLinkModifier
-                            : domainValue + link.irrelevantLinkModifier
-                } else {
-                    var value = 0;
-                }
-
-                return value;
-            },
-            parseUri: function () {
-                var link = this;
-                return Utils.parseUri(link.url);
-            },
-            social: function(callback) {
-                var link = this;
-                if(link.shares == null) {
-                    $.sharedCount(link.url, function(data) {
-                        link.shares = ContentShares(data);
-                        if (typeof callback == 'function')
-                            callback(link.shares);
-                        else return link.shares;
-                    });
-                } else {
-                    console.log("Retrieving from stored.")
-                        if (typeof callback == 'function')
-                            callback(link.shares);
-                        else return link.shares;
-                }
-            }
-        };
-
-        return ContentLink
-    })
+angular.module("artemis-content")
     .factory('ContentPiece', function(ContentLink,ContentShares,Utils) {
         var init = false
           , ContentPiece = {};
@@ -97,6 +16,14 @@ angular.module("artemis-content",[])
             new: function() {
                 init = true;
 
+                // Form today's YYYY-MM-DD date
+                function pad(n){return n<10 ? '0'+n : n}
+                var d = new Date();
+                var dd = pad(d.getDate());
+                var mm = pad(d.getMonth()+1);
+                var yyyy = d.getFullYear();
+                var dateToday = yyyy+"-"+mm+"-"+dd;
+
                 ContentPiece.data = {
                     name: "",
                     url: "",
@@ -105,6 +32,8 @@ angular.module("artemis-content",[])
                     knownLinks: [],
                     shares: {},
                     costPerHour: 75,
+                    dateFrom: "2005-01-01",
+                    dateTo: dateToday,
                     prices: {
                         twitter: 0.25,
                         facebook: 0.25,
@@ -162,7 +91,7 @@ angular.module("artemis-content",[])
                         data: {
                             url: "/links/" + encodeURIComponent(ContentPiece.data.url)
                                 + "?"
-                                + "&Scope=page_to_page"
+                                + "Scope=page_to_page"
                                 + "&Sort=domain_authority"
                                 + "&LinkCols=2" // Flags full of data on each link
                                 + "&TargetCols=32" // No. of links
@@ -228,11 +157,13 @@ angular.module("artemis-content",[])
                             data: {
                                 url: "/url-metrics/"
                                    + "?"
-                                   + "&Cols="
-                                   + (4 + 68719476736), // Canon URL + DA of source,
+                                   + "Cols="+(4 + 68719476736), // Canon URL + DA of source,
                                 array:  knownLinkDomains
                             },
-                            error: function(msg) { console.warn(msg); },
+                            error: function(msg) {
+                                console.warn(msg);
+                                cb();
+                            },
                             success: function(res) {
                                 var links = JSON.parse(res);
                                 links = _.filter(links, function(link) { return link.uu.length > 5 });
@@ -287,6 +218,42 @@ angular.module("artemis-content",[])
                 },
             },
 
+            buzzstreamLinks: function(options) {
+                $.ajax({
+                    url: "php/buzzstream.php",
+                    type: "POST", data: {
+                        url: "https://api.buzzstream.com/v1/links?linking_to="+options.url,
+                        key: options.key,
+                        secret: options.secret
+                    },
+                    error: function(msg) {
+                        console.warn(msg);
+                        options.onFinished();
+                    },
+                    success: function(res) {
+                        var buzzstreamData = JSON.parse(res);
+                        var links = buzzstreamData.list;
+                        _.each(links, function(link,i) {
+                            $.ajax({
+                                url: "php/buzzstream.php",
+                                type: "POST", data: {
+                                    url: link,
+                                    key: options.key,
+                                    secret: options.secret
+                                },
+                                error: function(msg) { console.warn(msg); },
+                                success: function(res) {
+                                    var thisURL = JSON.parse(res).linkingFrom;
+                                    if(typeof options.eachLink === 'function')
+                                        options.eachLink(thisURL,links)
+                                    if(i >= buzzstreamData.numResults-1 && typeof options.onFinished === 'function')
+                                        options.onFinished(links);
+                                }
+                            });
+                        })
+                    }
+                });
+            },
 
             stats: {
 
@@ -365,103 +332,3 @@ angular.module("artemis-content",[])
 
         return ContentPiece;
     })
-    .factory('Utils', function() {
-        //////////////////////
-        /// Utility functions
-        //////////////////////
-
-        jQuery.sharedCount = function(url, fn) {
-            url = encodeURIComponent(url || location.href);
-            var apikey = sharedCount.key;
-            var domain = sharedCount.url;
-            var arg = {
-              data: {
-                url : url,
-                apikey : apikey
-              },
-                url: domain,
-                cache: true,
-                dataType: "json"
-            };
-            if ('withCredentials' in new XMLHttpRequest) {
-                arg.success = fn;
-            }
-            else {
-                var cb = "sc_" + url.replace(/\W/g, '');
-                window[cb] = fn;
-                arg.jsonpCallback = cb;
-                arg.dataType += "p";
-            }
-            return jQuery.ajax(arg);
-        };
-
-        var Utils = {
-            mergeByProperty: function(arr1, arr2, prop) {
-                _.each(arr2, function(arr2obj) {
-                    var arr1obj = _.find(arr1, function(arr1obj) {
-                        return arr1obj[prop] === arr2obj[prop];
-                    });
-
-                    arr1obj ? _.extend(arr1obj, arr2obj) : arr1.push(arr2obj);
-                });
-            },
-
-            nearestPow2: function(aSize) {
-                return Math.pow(2, Math.floor(Math.log(aSize) / Math.log(2)));
-            },
-
-            lfBitFlag: function(input) {
-                // console.log("---");
-                // console.log(input);
-                var bitpointer = input,
-                    bitFlags = [],
-                    nearestSmallerSquare = Utils.nearestPow2(bitpointer)
-
-                do {
-                    nearestSmallerSquare = Utils.nearestPow2(bitpointer);
-                    // console.log(bitpointer,"-",nearestSmallerSquare)
-                    bitpointer -= nearestSmallerSquare;
-                    bitFlags.push(nearestSmallerSquare);
-                }
-                while (bitpointer > 0)
-
-                isNoFollow = _.any(bitFlags, function(bitflag) {
-                    return bitflag === 1;
-                })
-                // console.log(bitFlags)
-                // console.log("Nofollow: "+isNoFollow);
-                return isNoFollow;
-            },
-
-            parseUri: function(str) {
-                this.options = {
-                    strictMode: false,
-                    key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-                    q:   {
-                        name:   "queryKey",
-                        parser: /(?:^|&)([^&=]*)=?([^&]*)/g
-                    },
-                    parser: {
-                        strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-                        loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-                    }
-                }
-
-                var o   = this.options,
-                    m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
-                    uri = {},
-                    i   = 14;
-
-                while (i--) uri[o.key[i]] = m[i] || "";
-
-                uri[o.q.name] = {};
-                uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
-                    if ($1) uri[o.q.name][$1] = $2;
-                });
-
-                return uri;
-            }
-        }
-
-        return Utils;
-    });

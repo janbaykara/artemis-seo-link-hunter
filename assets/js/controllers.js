@@ -2,14 +2,15 @@ angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
     })
-    .controller('input', function($scope,$state,ContentPiece) {
+    .controller('input', function($scope,$state,$http,$window,ContentPiece,GoogleAPI,Utils) {
 
         // Default values
         $scope.newPiece = {
             inputLinks: "",
-            name: "The Periodic Table of Chillis",
+            name: "Periodic Table of Chillis",
             url: "http://www.appliancecity.co.uk/chilli/",
-            billableHours: 20
+            billableHours: 20,
+            dateFrom: "2013-05-03"
         };
 
         // ng-click()
@@ -18,7 +19,8 @@ angular.module("artemis")
                 name: $scope.newPiece.name,
                 url: $scope.newPiece.url,
                 billableHours: $scope.newPiece.billableHours,
-                knownLinks: $scope.knownLinks()
+                knownLinks: $scope.knownLinks(),
+                dateFrom: $scope.newPiece.dateFrom
             });
 
             console.log("Loading content links");
@@ -34,20 +36,12 @@ angular.module("artemis")
             });
         }
 
-        function cleanArray(actual){
-          var newArray = new Array();
-          for(var i = 0; i<actual.length; i++){
-              if (actual[i]){
-                newArray.push(actual[i]);
-            }
-          }
-          return newArray;
-        }
-
+        ///////////////////
+        //// KNOWN LINKS + BUZZSTREAM INTEGRATION
+        ///////////////////
         $scope.knownLinks = function() {
-            return cleanArray($scope.newPiece.inputLinks.split("\n"));
+            return Utils.cleanArray($scope.newPiece.inputLinks.split("\n"));
         }
-
         $scope.buzzstream = {
             done: false,
             doing: false,
@@ -55,51 +49,88 @@ angular.module("artemis")
             key: 'f41fb799-2865-4621-94a0-97091d515d21',
             secret: 'VgZzmN7AYLRw36An0pFFh_Z-0kCXhnT67pUqX3-f-83c6Jp-PuuoMe9FiS_SdA6v'
         }
-
         $scope.fetchBuzzstream = function() {
             $scope.buzzstream.done = false;
             $scope.buzzstream.doing = true;
-            $.ajax({
-                url: "php/buzzstream.php",
-                type: "POST", data: {
-                    url: "https://api.buzzstream.com/v1/links?linking_to="+$scope.newPiece.url,
-                    key: $scope.buzzstream.key,
-                    secret: $scope.buzzstream.secret
+            ContentPiece.buzzstreamLinks({
+                url: $scope.newPiece.url,
+                key: $scope.buzzstream.key,
+                secret: $scope.buzzstream.secret,
+                eachLink: function(thisURL,links) {
+                    // Add to textarea
+                    $scope.$apply(function() { $scope.newPiece.inputLinks += "\n"+thisURL; });
                 },
-                error: function(msg) { console.warn(msg); },
-                success: function(res) {
-                    var buzzstreamData = JSON.parse(res);
-                    var links = buzzstreamData.list;
-                    _.each(links, function(link,i) {
-                        $.ajax({
-                            url: "php/buzzstream.php",
-                            type: "POST", data: {
-                                url: link,
-                                key: $scope.buzzstream.key,
-                                secret: $scope.buzzstream.secret
-                            },
-                            error: function(msg) { console.warn(msg); },
-                            success: function(res) {
-                                var thisURL = JSON.parse(res).linkingFrom;
-                                $scope.$apply(function() { $scope.newPiece.inputLinks += "\n"+thisURL; });
-                                if(i >= buzzstreamData.numResults-1) {
-                                    $scope.$apply(function() {
-                                        $scope.buzzstream.doing = false;
-                                        $scope.buzzstream.done = true;
-                                    });
-                                }
-                            }
-                        });
-                    })
+                onFinished: function(links) {
+                    $scope.$apply(function() {
+                        $scope.buzzstream.doing = false;
+                        $scope.buzzstream.done = true;
+                    });
                 }
             });
         }
     })
-    .controller('output', function($scope,$state,ContentPiece,$sce) {
+    .controller('output', function($scope,$state,$sce,$window,ContentPiece,GoogleAPI,Utils) {
         if(!ContentPiece.initialised()) $state.go('app.input');
         $scope.ContentPiece = ContentPiece;
         $scope.hideDuplicates = true;
         $scope.ContentPiece.safeURL = $sce.trustAsResourceUrl($scope.ContentPiece.data.url);
+
+        ///////////////////
+        //// GOOGLE ANALYTICS REFERRAL TRAFFIC
+        ///////////////////
+        $scope.googleAnalytics = function() {
+            console.log("Auth'ing with Google, for analytics data.")
+            var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
+                            + "&scope=https://www.googleapis.com/auth/analytics.readonly"
+                            + "&response_type=token"
+                            + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
+                            + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
+            var w = Utils.popupWindow(oauthURL,"_blank",500,500);
+        }
+        $window.authParams = function(authObj) {
+            $scope.GoogleAPI = GoogleAPI;
+            $scope.GoogleAPI.access_token = authObj.access_token;
+            $scope.GoogleAPI.ContentPiece = $scope.ContentPiece;
+            $scope.analytics.getAccounts();
+        }
+        $scope.analytics = {
+            getAccounts: function() {
+                $scope.GoogleAPI.getAccounts(function(data) {
+                    $scope.GoogleAPI.accounts = data.items;
+                });
+            },
+            getWebProperties: function() {
+                $scope.GoogleAPI.getWebProperties(function(data) {
+                    $scope.GoogleAPI.webproperties = data.items;
+                });
+            },
+            getViews: function() {
+                $scope.GoogleAPI.getViews(function(data) {
+                    $scope.GoogleAPI.views = data.items;
+                });
+            },
+            getReferralData: function() {
+                $scope.GoogleAPI.getReferralData(
+                    function(trafficData) {
+                        $scope.GoogleAPI.trafficData = trafficData;
+                        _.each(ContentPiece.data.links, function(eachLink) {
+                            // Try to match up ContentLinks with trafficData links
+                            $scope.$apply(function() {
+                                eachLink.referrals = _.find(trafficData,function(referralLink) {
+                                                        return (eachLink.url.indexOf(referralLink.url) > -1);
+                                                    });
+                            });
+                        })
+                        // _.each(trafficData,function(datum) {
+                        //     console.log(datum.url+" ===> "+datum.visits)
+                        // })
+                    }
+                )
+            }
+        }
+        $scope.logX = function(val,x) {
+          return Math.log(val) / Math.log(x);
+        }
     })
     .filter('sup', function($sce) {
         return function(input) {

@@ -5,13 +5,17 @@
 </div>
 
 <div class='row'>
-    <div class="form-group col-md-9">
+    <div class="form-group col-md-8">
         <label for="input-content-title">Title</label>
         <input type="text" class="form-control" ng-model='newPiece.name' id="input-content-name" placeholder="Content name" />
     </div>
-    <div class="form-group col-md-3">
+    <div class="form-group col-md-2">
+        <label for="input-content-billableHours">Publish date</label>
+        <input type="text" class="form-control" ng-model='newPiece.dateFrom' id="input-content-date" placeholder="YYYY-MM-DD" />
+    </div>
+    <div class="form-group col-md-2">
         <label for="input-content-billableHours">Billable hours</label>
-        <input type="number" class="form-control" ng-model='newPiece.billableHours' id="input-content-billableHours" placeholder="0" />
+        <input type="number" class="form-control" ng-model='newPiece.billableHours' id="input-content-billableHours" placeholder="0 Hours" />
     </div>
 </div>
 
@@ -27,7 +31,7 @@
         <input type='text' class='form-control' ng-model='buzzstream.secret' placeholder='Buzzstream Consumer Secret' />
         <button ng-click='fetchBuzzstream()' type='button' class='btn col-md-12' ng-class='{"btn-success": buzzstream.done}'>
             {{buzzstream.done ? 'Finished fetching Buzzstream links' : buzzstream.doing ? 'Fetching Buzzstream links' : 'Fetch Buzzstream links'}}
-         </button>
+        </button>
     </div>
     <div class='col-md-12'>
         <div class="form-group">

@@ -28,37 +28,42 @@
 
             <div class='row'>
                 <!-- Spread stats -->
-                <div class='col-sm-6'>
-                    <div class='dv'>
-                        <div class='dv__val'>{{ContentPiece.data.equitableLinkCount}}</div>
-                        <div class='dv__label'>Equitable links</div class='dv__label'>
-                    </div>
-                    <div class='dv'>
-                        <div class='dv__val'>{{ContentPiece.stats.socialCount()}}</div>
-                        <div class='dv__label'>Total shares</div class='dv__label'>
-                    </div>
+                <div class='dv col-xs-6'>
+                    <div class='dv__val'>{{ContentPiece.data.equitableLinkCount}}</div>
+                    <div class='dv__label'>Equitable links</div>
                 </div>
+                <div class='dv col-xs-6'>
+                    <div class='dv__val'>{{ContentPiece.stats.socialCount()}}</div>
+                    <div class='dv__label'>Total shares</div>
+                </div>
+            </div>
 
+            <div class='row'>
                 <!-- Cost breakdown -->
-                <div class='col-sm-6'>
-                    <div class='dv'>
-                        <div class='dv__val' ng-bind-html='ContentPiece.stats.cost()|currency:"£"|sup'></div>
-                        <div class='dv__label'>Cost</div class='dv__label'>
-                    </div>
-                    <div class='dv'>
+                <div class='col-xs-12'>
+                    <div class='dv h'>
                         <div class='dv__val' ng-bind-html='ContentPiece.stats.value()|currency:"£"|sup'></div>
-                        <div class='dv__label'>Calculated value</div class='dv__label'>
+                        <div class='dv__label'>Calculated value</div>
                     </div>
-                    <div class='dv'>
+                    <div class='dv h'>
+                        <div class='dv__val'>-</div>
+                    </div>
+                    <div class='dv h'>
+                        <div class='dv__val' ng-bind-html='ContentPiece.stats.cost()|currency:"£"|sup'></div>
+                        <div class='dv__label'>Cost</div>
+                    </div>
+                    <div class='dv h'>
+                        <div class='dv__val'>=</div>
+                    </div>
+                    <div class='dv h'>
                         <div class='dv__val' style='color: hsl(
                             {{ContentPiece.stats.profitloss()|normalise:-1000:1000:0:135}},
                             100%,
                             40%
                         )' ng-bind-html='ContentPiece.stats.profitloss()|currency:"£"|sup'></div>
-                        <div class='dv__label'>Profit/loss</div class='dv__label'>
+                        <div class='dv__label'>Profit/loss</div>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -127,6 +132,28 @@
                     <h2 class='data-section__title'>Link stats</h2>
                     <p>By factoring out no-follow links and discounting less relevant links, and taking in to account the link’s Domain Authority, we can estimate the value of links back to the content.</p>
                 </header>
+
+                <div class='col-sm-6'>
+                    <h4 class='col-xs-12'>Referral Traffic Data integration</h4>
+                    <div class='form-group col-xs-12'>
+                        <button ng-click='googleAnalytics()' type='button' class='btn col-sm-12'>Sync data from Google Analytics</button>
+                    </div>
+                    <div class='form-group col-sm-12' ng-show='GoogleAPI.accounts'>
+                        <select id='ga-1' class='form-control' ng-options="item.id as item.name for item in GoogleAPI.accounts | orderBy:'name' " ng-model="GoogleAPI.account" ng-change="analytics.getWebProperties()">
+                            <option value="">Select an Analytics Account</option>
+                        </select>
+                    </div>
+                    <div class='form-group col-sm-12' ng-show='GoogleAPI.webproperties'>
+                        <select id='ga-2' class='form-control' ng-options="item.id as item.name for item in GoogleAPI.webproperties | orderBy:'name' " ng-model="GoogleAPI.webproperty" ng-change="analytics.getViews()">
+                            <option value="">Select a Web Property</option>
+                        </select>
+                    </div>
+                    <div class='form-group col-sm-12' ng-show='GoogleAPI.views'>
+                        <select id='ga-3' class='form-control' ng-options="item.id as item.name for item in GoogleAPI.views | orderBy:'name' " ng-model="GoogleAPI.view" ng-change="analytics.getReferralData()">
+                            <option value="">Select a Profile</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Link list -->
@@ -140,9 +167,10 @@
                         <th class='angled'>Equitable</th>
                         <th class='angled'>Relevant</th>
                         <th class='angled'>Unique</th>
+                        <th class='angled'>D.A.</th>
                         <th>Link URL</th>
-                        <th>Domain Authority</th>
                         <th>Value</th>
+                        <th>Referral visits</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -162,23 +190,31 @@
                         <td class='link-graph__relevance'>
                             <input ng-model='link.domainRepresentative' type='checkbox' />
                         </td>
+                        <td>
+                            <div style='color: hsl({{link.domainAuthority|normalise:0:100:45:0}},80%,40%)'>
+                                {{link.domainAuthority|number:1}}
+                            </div>
+                        </td>
                         <td class='link-graph__url'>
+                            <div class='link-graph__da-bar' style='width:{{link.domainAuthority}}%;
+                                border-color: hsla({{link.domainAuthority|normalise:0:100:45:0}},80%,40%,0.5)'>
+                            </div>
                             <div class='tr'>
                                 <a href='{{link.url}}' target='_blank' class='link-graph__authority'>{{link.domain}}</a>
                                 <a class='link-graph__source' href='{{link.url}}' target='_blank'>{{link.parseUri().relative}}</a>
-                            </div>
-                        </td>
-                        <td class='link-graph__da-bar'>
-                            <div style='width:{{link.domainAuthority}}%;
-                                border-color: hsla(0,0%,0%,{{link.domainAuthority|normalise:0:100:0:50:100}});
-                                color: hsl({{link.domainAuthority|normalise:0:100:45:0}},80%,40%)'>
-                                {{link.domainAuthority|number:1}}
                             </div>
                         </td>
                         <td class='link-graph__value'>
                             <div ng-show='link.equitable && link.domainRepresentative' ng-bind-html='link.value()|currency:"£"|sup'></div>
                             <div ng-show='!link.equitable' class='disqualifier'>No-follow</div>
                             <div ng-show='!link.domainRepresentative' class='disqualifier'>Duplicate</div>
+                        </td>
+                        <td class='link-graph__views link-graph__value' ng-class='{hasReferrals: link.referrals.visits > 0}'>
+                            <div class='link-graph__views-bar'
+                                 style='height: {{logX(link.referrals.visits,6)*40}}px;
+                                       width: {{logX(link.referrals.visits,6)*20}}px'>
+                                {{link.referrals.visits}}
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -187,19 +223,19 @@
             <div class='row'>
                 <div class='dv col-md-3'>
                     <div class='dv__val'>{{ContentPiece.stats.usefulLinkCount()}}</div>
-                    <div class='dv__label'>Useful links</div class='dv__label'>
+                    <div class='dv__label'>Useful links</div>
                 </div>
                 <div class='dv col-md-3'>
                     <div class='dv__val'>{{ContentPiece.stats.averageDA()|number:1}}</div>
-                    <div class='dv__label'>Avg. DA (useful links)</div class='dv__label'>
+                    <div class='dv__label'>Avg. DA (useful links)</div>
                 </div>
                 <div class='dv col-md-3'>
                     <div class='dv__val' ng-bind-html='ContentPiece.stats.value() / ContentPiece.stats.usefulLinkCount() |currency:"£"|sup'></div>
-                    <div class='dv__label'>Avg. link value (useful links)</div class='dv__label'>
+                    <div class='dv__label'>Avg. link value (useful links)</div>
                 </div>
                 <div class='dv col-md-3 pull-right'>
                     <div class='dv__val' ng-bind-html='ContentPiece.stats.linkValue()|currency:"£"|sup'></div>
-                    <div class='dv__label'>Total value (useful links)</div class='dv__label'>
+                    <div class='dv__label'>Total value (useful links)</div>
                 </div>
             </div>
 

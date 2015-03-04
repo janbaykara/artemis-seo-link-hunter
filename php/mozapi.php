@@ -1,13 +1,14 @@
 <?php
+set_time_limit(30);
+
 $objectURL = $_POST['url'];
-$batchedData = $_POST['array'];
-if($batchedData) {
-    $encodedData = json_encode($batchedData);
+if(!empty($_POST['array'])) {
+    $encodedData = json_encode($_POST['array']);
 }
 /**
 */
 $accessID = "member-c585999055";
-$secretKey = "79fb24f5736619a2029d7da68fbd88ec";
+$secretKey = "676396e4e393d3ec091fe91a2bd41eee";
 /*
 **/
 
@@ -28,7 +29,7 @@ $requestUrl = "http://lsapi.seomoz.com/linkscape".$objectURL."&AccessID=".$acces
 $options = array(
     CURLOPT_RETURNTRANSFER => true
 );
-if($encodedData) { $options[CURLOPT_POSTFIELDS] = $encodedData; }
+if(isset($encodedData)) { $options[CURLOPT_POSTFIELDS] = $encodedData; }
 
 $ch = curl_init($requestUrl);
 curl_setopt_array($ch, $options);
