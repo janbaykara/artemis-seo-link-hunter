@@ -36,7 +36,9 @@
                     <div class='dv__val'>{{ContentPiece.stats.socialCount()}}</div>
                     <div class='dv__label'>Total shares</div>
                 </div>
+            </div>
 
+            <div class='row'>
                 <!-- Cost breakdown -->
                 <div class='col-xs-12'>
                     <div class='dv h'>
@@ -44,14 +46,14 @@
                         <div class='dv__label'>Calculated value</div>
                     </div>
                     <div class='dv h'>
-                        <div class='dv__label'>-</div>
+                        <div class='dv__val'>-</div>
                     </div>
                     <div class='dv h'>
                         <div class='dv__val' ng-bind-html='ContentPiece.stats.cost()|currency:"£"|sup'></div>
                         <div class='dv__label'>Cost</div>
                     </div>
                     <div class='dv h'>
-                        <div class='dv__label'>=</div>
+                        <div class='dv__val'>=</div>
                     </div>
                     <div class='dv h'>
                         <div class='dv__val' style='color: hsl(
@@ -62,7 +64,6 @@
                         <div class='dv__label'>Profit/loss</div>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -141,22 +142,22 @@
                     <button ng-click='googleAnalytics()' type='button' class='btn col-sm-12'>Sync data from Google Analytics</button>
                 </div>
                 <div class='col-sm-8'>
-                    <div class='form-group col-sm-4' ng-show='google.accounts'>
+                    <div class='form-group col-sm-4' ng-show='GoogleAPI.accounts'>
                         <label for="ga-1">Analytics Account</label>
-                        <select id='ga-1' class='form-control' ng-options="item.id as item.name for item in google.accounts"
-                            ng-model="google.account" ng-change="analytics.getWebProperties()"></select>
+                        <select id='ga-1' class='form-control' ng-options="item.id as item.name for item in GoogleAPI.accounts | orderBy:'name' "
+                            ng-model="GoogleAPI.account" ng-change="analytics.getWebProperties()"></select>
                     </div>
 
-                    <div class='form-group col-sm-4' ng-show='google.webproperties'>
+                    <div class='form-group col-sm-4' ng-show='GoogleAPI.webproperties'>
                         <label for="ga-2">Web Property</label>
-                        <select id='ga-2' class='form-control' ng-options="item.id as item.name for item in google.webproperties"
-                            ng-model="google.webproperty" ng-change="analytics.getViews()"></select>
+                        <select id='ga-2' class='form-control' ng-options="item.id as item.name for item in GoogleAPI.webproperties | orderBy:'name' "
+                            ng-model="GoogleAPI.webproperty" ng-change="analytics.getViews()"></select>
                     </div>
 
-                    <div class='form-group col-sm-4' ng-show='google.views'>
+                    <div class='form-group col-sm-4' ng-show='GoogleAPI.views'>
                         <label for="ga-3">View/Profile</label>
-                        <select id='ga-3' class='form-control' ng-options="item.id as item.name for item in google.views"
-                            ng-model="google.view" ng-change="analytics.getReferralData()"></select>
+                        <select id='ga-3' class='form-control' ng-options="item.id as item.name for item in GoogleAPI.views | orderBy:'name' "
+                            ng-model="GoogleAPI.view" ng-change="analytics.getReferralData()"></select>
                     </div>
                 </div>
                 <br>
@@ -176,8 +177,8 @@
                         <th class='angled'>Equitable</th>
                         <th class='angled'>Relevant</th>
                         <th class='angled'>Unique</th>
+                        <th class='angled'>D.A.</th>
                         <th>Link URL</th>
-                        <th>Domain Authority</th>
                         <th>Value</th>
                         <th>Referrals</th>
                     </tr>
@@ -199,17 +200,18 @@
                         <td class='link-graph__relevance'>
                             <input ng-model='link.domainRepresentative' type='checkbox' />
                         </td>
+                        <td>
+                            <div style='color: hsl({{link.domainAuthority|normalise:0:100:45:0}},80%,40%)'>
+                                {{link.domainAuthority|number:1}}
+                            </div>
+                        </td>
                         <td class='link-graph__url'>
+                            <div class='link-graph__da-bar' style='width:{{link.domainAuthority}}%;
+                                border-color: hsla({{link.domainAuthority|normalise:0:100:45:0}},80%,40%,0.3)'>
+                            </div>
                             <div class='tr'>
                                 <a href='{{link.url}}' target='_blank' class='link-graph__authority'>{{link.domain}}</a>
                                 <a class='link-graph__source' href='{{link.url}}' target='_blank'>{{link.parseUri().relative}}</a>
-                            </div>
-                        </td>
-                        <td class='link-graph__da-bar'>
-                            <div style='width:{{link.domainAuthority}}%;
-                                border-color: hsla(0,0%,0%,{{link.domainAuthority|normalise:0:100:0:50:100}});
-                                color: hsl({{link.domainAuthority|normalise:0:100:45:0}},80%,40%)'>
-                                {{link.domainAuthority|number:1}}
                             </div>
                         </td>
                         <td class='link-graph__value'>
@@ -218,9 +220,7 @@
                             <div ng-show='!link.domainRepresentative' class='disqualifier'>Duplicate</div>
                         </td>
                         <td class='link-graph__views link-graph__value'>
-                            <div ng-style=' border-color: hsla(0,0%,0%,{{link.referral.views|normalise:0:100:0:50}});
-                                            height: {{link.referral.views * 3}}px'
-                                            >{{link.referral.views}}</div>
+                            <div>{{link.referral.views}}</div>
                         </td>
                     </tr>
                 </tbody>
