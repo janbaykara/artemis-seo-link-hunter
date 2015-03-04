@@ -16,6 +16,14 @@ angular.module("artemis-content")
             new: function() {
                 init = true;
 
+                // Form today's YYYY-MM-DD date
+                function pad(n){return n<10 ? '0'+n : n}
+                var d = new Date();
+                var dd = pad(d.getDate());
+                var mm = pad(d.getMonth()+1);
+                var yyyy = d.getFullYear();
+                var dateToday = yyyy+"-"+mm+"-"+dd;
+
                 ContentPiece.data = {
                     name: "",
                     url: "",
@@ -24,6 +32,8 @@ angular.module("artemis-content")
                     knownLinks: [],
                     shares: {},
                     costPerHour: 75,
+                    dateFrom: "2005-01-01",
+                    dateTo: dateToday,
                     prices: {
                         twitter: 0.25,
                         facebook: 0.25,

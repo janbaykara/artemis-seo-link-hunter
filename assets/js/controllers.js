@@ -10,7 +10,7 @@ angular.module("artemis")
             name: "Periodic Table of Chillis",
             url: "http://www.appliancecity.co.uk/chilli/",
             billableHours: 20,
-            date: "2013-05-03"
+            dateFrom: "2013-05-03"
         };
 
         // ng-click()
@@ -19,7 +19,8 @@ angular.module("artemis")
                 name: $scope.newPiece.name,
                 url: $scope.newPiece.url,
                 billableHours: $scope.newPiece.billableHours,
-                knownLinks: $scope.knownLinks()
+                knownLinks: $scope.knownLinks(),
+                dateFrom: $scope.newPiece.dateFrom
             });
 
             console.log("Loading content links");
