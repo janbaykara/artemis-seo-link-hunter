@@ -160,7 +160,10 @@ angular.module("artemis-content")
                                    + "Cols="+(4 + 68719476736), // Canon URL + DA of source,
                                 array:  knownLinkDomains
                             },
-                            error: function(msg) { console.warn(msg); },
+                            error: function(msg) {
+                                console.warn(msg);
+                                cb();
+                            },
                             success: function(res) {
                                 var links = JSON.parse(res);
                                 links = _.filter(links, function(link) { return link.uu.length > 5 });
@@ -223,7 +226,10 @@ angular.module("artemis-content")
                         key: options.key,
                         secret: options.secret
                     },
-                    error: function(msg) { console.warn(msg); },
+                    error: function(msg) {
+                        console.warn(msg);
+                        options.onFinished();
+                    },
                     success: function(res) {
                         var buzzstreamData = JSON.parse(res);
                         var links = buzzstreamData.list;
