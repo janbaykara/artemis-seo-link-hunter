@@ -5,6 +5,7 @@
     "jquery": "*",
     "angularjs": "*",
     "angular-ui-router": "*",
-    "angular-datavis": "~1.1.1"
+    "angular-datavis": "~1.1.1",
+    "oauth-signature": "~1.3.0"
   }
 }

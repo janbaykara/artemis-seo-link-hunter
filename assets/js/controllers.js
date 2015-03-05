@@ -52,21 +52,25 @@ angular.module("artemis")
         $scope.fetchBuzzstream = function() {
             $scope.buzzstream.done = false;
             $scope.buzzstream.doing = true;
-            BuzzstreamAPI.getLinksToURL({
-                url: $scope.newPiece.url,
-                key: $scope.buzzstream.key,
-                secret: $scope.buzzstream.secret,
-                eachLink: function(thisURL,links) {
-                    // Add to textarea
-                    $scope.$apply(function() { $scope.newPiece.inputLinks += "\n"+thisURL; });
-                },
-                onFinished: function(links) {
-                    $scope.$apply(function() {
-                        $scope.buzzstream.doing = false;
-                        $scope.buzzstream.done = true;
-                    });
-                }
-            });
+            BuzzstreamAPI.authenticate({
+                callback: "http://www.boom-online.co.uk/playground/boom/artemis/boauth",
+                consumer_key: "f41fb799-2865-4621-94a0-97091d515d21",
+            })
+            // BuzzstreamAPI.getLinksToURL({
+            //     url: $scope.newPiece.url,
+            //     key: $scope.buzzstream.key,
+            //     secret: $scope.buzzstream.secret,
+            //     eachLink: function(thisURL,links) {
+            //         // Add to textarea
+            //         $scope.$apply(function() { $scope.newPiece.inputLinks += "\n"+thisURL; });
+            //     },
+            //     onFinished: function(links) {
+            //         $scope.$apply(function() {
+            //             $scope.buzzstream.doing = false;
+            //             $scope.buzzstream.done = true;
+            //         });
+            //     }
+            // });
         }
     })
     .controller('output', function($scope,$state,$sce,$window,ContentPiece,GoogleAPI,Utils) {
