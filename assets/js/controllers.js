@@ -78,17 +78,17 @@ angular.module("artemis")
         ///////////////////
         //// GOOGLE ANALYTICS REFERRAL TRAFFIC
         ///////////////////
+        $scope.GoogleAPI = GoogleAPI;
+
         $scope.googleAnalytics = function() {
             console.log("Auth'ing with Google, for analytics data.")
-            var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
-                            + "&scope=https://www.googleapis.com/auth/analytics.readonly"
-                            + "&response_type=token"
-                            + "&client_id=696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com"
-                            + "&redirect_uri=http://www.boom-online.co.uk/playground/boom/artemis/goauth/";
-            var w = Utils.popupWindow(oauthURL,"_blank",500,500);
+            $scope.GoogleAPI.authenticate({
+                scope: "https://www.googleapis.com/auth/analytics.readonly",
+                client_id: "696947788101-j3ak6sd69ic5t4bc869pkugeochfsfg6.apps.googleusercontent.com",
+                redirect_uri: "http://www.boom-online.co.uk/playground/boom/artemis/goauth/"
+            });
         }
         $window.authParams = function(authObj) {
-            $scope.GoogleAPI = GoogleAPI;
             $scope.GoogleAPI.access_token = authObj.access_token;
             $scope.GoogleAPI.ContentPiece = $scope.ContentPiece;
             $scope.analytics.getAccounts();
