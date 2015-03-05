@@ -170,7 +170,7 @@
                         <th class='angled'>D.A.</th>
                         <th>Link URL</th>
                         <th>Value</th>
-                        <th>Referral visits</th>
+                        <th>Domain referrals</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -209,11 +209,11 @@
                             <div ng-show='!link.equitable' class='disqualifier'>No-follow</div>
                             <div ng-show='!link.domainRepresentative' class='disqualifier'>Duplicate</div>
                         </td>
-                        <td class='link-graph__views link-graph__value' ng-class='{hasReferrals: link.referrals.visits > 0}'>
+                        <td class='link-graph__views link-graph__value' ng-class='{hasReferrals: link.referrals > 0}'>
                             <div class='link-graph__views-bar'
-                                 style='height: {{logX(link.referrals.visits,6)*40}}px;
-                                       width: {{logX(link.referrals.visits,6)*20}}px'>
-                                {{link.referrals.visits}}
+                                 style='height: {{logX(link.referrals,6)*40}}px;
+                                       width: {{logX(link.referrals,6)*20}}px'>
+                                {{link.referrals}}
                             </div>
                         </td>
                     </tr>

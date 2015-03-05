@@ -29,7 +29,7 @@ angular.module("artemis-content")
             this.irrelevantLinkModifier = -50;
             this.relevantLinkModifier = 10;
             this.shares = null;
-            this.referrals = {};
+            this.referrals = 0;
 
             for(var prop in arguments[0])   {
                 this[prop] = arguments[0][prop];
