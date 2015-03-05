@@ -2,7 +2,7 @@ angular.module("artemis")
     .controller('app', function($scope,$state) {
         $scope._ = _;
     })
-    .controller('input', function($scope,$state,$http,$window,ContentPiece,GoogleAPI,Utils) {
+    .controller('input', function($scope,$state,$http,$window,ContentPiece,GoogleAPI,BuzzstreamAPI,Utils) {
 
         // Default values
         $scope.newPiece = {
@@ -52,7 +52,7 @@ angular.module("artemis")
         $scope.fetchBuzzstream = function() {
             $scope.buzzstream.done = false;
             $scope.buzzstream.doing = true;
-            ContentPiece.buzzstreamLinks({
+            BuzzstreamAPI.getLinksToURL({
                 url: $scope.newPiece.url,
                 key: $scope.buzzstream.key,
                 secret: $scope.buzzstream.secret,
