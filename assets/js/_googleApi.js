@@ -4,6 +4,15 @@ angular.module('artemis-content')
             GoogleAPI = {};
 
         GoogleAPI = {
+            authenticate: function(opts) {
+                var oauthURL = "https://accounts.google.com/o/oauth2/auth?"
+                + "&scope="+opts.scope
+                + "&response_type=token"
+                + "&client_id="+opts.client_id
+                + "&redirect_uri="+opts.redirect_uri
+                Utils.popupWindow(oauthURL,"_blank",500,500);
+            },
+
             getAccounts: function(cb) {
                 $http({method:"GET",
                     url: gaApiUrl+"/management/accounts",
